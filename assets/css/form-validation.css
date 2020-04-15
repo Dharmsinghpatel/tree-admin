@@ -1,0 +1,14 @@
+label {
+    font-size: 12px;
+}
+
+.error {
+    color: #a94442;
+    border-color: #a94442;
+    margin-top: 10px;
+}
+
+.panel {
+    border: 1px solid;
+    border-color: black;
+}
