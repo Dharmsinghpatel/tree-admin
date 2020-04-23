@@ -57,4 +57,6 @@ $route['documents/get-documents'] = 'documents/get_documents';
 // $route['resources'] = 'documents';
 $route['resources/get-resources'] = 'resources/get_resources';
 $route['resources/add-resource'] = 'resources/add_resource';
+$route['resources/add-resource/(:any)'] = 'resources/add_resource/$1';
+// $route['uri-(:any)/(:num)'] = "controller/function/$1/$2";
 $route['resources/list-resources'] = 'resources/list_resources';

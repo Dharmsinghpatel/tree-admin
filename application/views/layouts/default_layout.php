@@ -207,6 +207,7 @@
     <script src="<?php echo base_url(); ?>assets/js/form-validation.js"></script>
     <!-- Validation JS file -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.js"></script>
+    <script src="http://jqueryvalidation.org/files/dist/additional-methods.min.js"></script>
 
 </body>
 

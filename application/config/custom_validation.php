@@ -12,11 +12,6 @@ $config = array(
             'field' => 'type',
             'rules' => array('trim', 'required'),
             'errors' =>  'You must provide a %s.',
-        ),
-        array(
-            'field' => 'url',
-            'rules' => array('trim', 'required'),
-            'errors' =>  'You must provide a %s.',
         )
     )
 );

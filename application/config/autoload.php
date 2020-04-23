@@ -58,7 +58,7 @@ $autoload['packages'] = array();
 |
 |	$autoload['libraries'] = array('user_agent' => 'ua');
 */
-$autoload['libraries'] = array('template', 'form_validation');
+$autoload['libraries'] = array('template', 'form_validation', 'database', 'session');
 
 /*
 | -------------------------------------------------------------------
@@ -103,7 +103,7 @@ $autoload['helper'] = array('form', 'url', 'agriarbor');
 | config files.  Otherwise, leave it blank.
 |
 */
-$autoload['config'] = array('custom_validation');
+$autoload['config'] = array('custom_validation', 'agriarbor_config');
 
 /*
 | -------------------------------------------------------------------

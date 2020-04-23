@@ -13,9 +13,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <table id="<?php echo $datatable_id ?>" data-url="<?php echo site_url($data_url) ?>" class="table table-bordered table-striped table-hover table-data" style="width:100%">
         <thead>
             <tr>
-                <td>Sno</td>
-                <td style="width:10%">Title</td>
-                <td>Type</td>
+                <td style="width:10%">Sno</td>
+                <td>Title</td>
+                <td style="width:20%">Type</td>
                 <td>Action</td>
             </tr>
         </thead>

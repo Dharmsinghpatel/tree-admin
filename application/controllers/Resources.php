@@ -24,7 +24,8 @@ class Resources extends CI_Controller
     public function __construct()
     {
         Parent::__construct();
-        $this->load->model("resources_model");
+        $this->load->model("resources_model", "resource");
+        $this->load->helper('url');
     }
 
     public function index()
@@ -40,17 +41,18 @@ class Resources extends CI_Controller
         $start = intval($this->input->get("start"));
         $length = intval($this->input->get("length"));
 
-        $contents_data = $this->resources_model->get_resources();
+        $resources = $this->resource->get_resources();
         $data = array();
 
         $i = 1;
-        foreach ($contents_data['result'] as $r) {
+        foreach ($resources->result_array() as $r) {
+            $edit_link = site_url('/resources/add-resource/' . $r['id']);
             $data[] = array(
                 "DT_RowId" => $i,
                 $i,
                 $r['title'],
                 $r['type'],
-                '<a class="mr-10" href="#">
+                '<a class="mr-10" href="' . $edit_link . '">
                     <button class="btn btn-outline-primary ">Edit</button>
                 </a> 
                 <a class="mr-10" href="#">
@@ -65,8 +67,8 @@ class Resources extends CI_Controller
 
         $output = array(
             "draw" => $draw,
-            "recordsTotal" => $contents_data['num_rows'],
-            "recordsFiltered" => $contents_data['num_rows'],
+            "recordsTotal" => $resources->num_rows(),
+            "recordsFiltered" => $resources->num_rows(),
             "data" => $data
         );
 
@@ -80,25 +82,33 @@ class Resources extends CI_Controller
         $this->template->load('default_layout', 'contents', 'resources', $data);
     }
 
-    public function add_resource()
+    public function add_resource($id = null)
     {
         $data = array('title' => "Add Resource");
         $form = array();
 
-        $form['title'] = $this->input->post('title');
-        $form['type'] = $this->input->post('type');
-        $form['description'] = $this->input->post('description');
-        $form['submit'] = $this->input->post('submit');
-        $form['add-more'] = $this->input->post('add-more');
+        if (!empty($id)) {
+            $data['title'] = 'Edit Resource';
+            $data['detail'] = $this->resource->get_detail($id);
+        }
+        $form = $this->input->post();
+        $form['file'] = $_FILES;
 
         if (!empty($form['submit'])) {
             $validation_rules = $this->config->item('resources_form');
             $this->form_validation->set_rules($validation_rules);
-
             if ($this->form_validation->run() == true) {
+                $status = $this->resource->add_resources($form);
+
+                if ($status) {
+                    $this->session->set_flashdata('success', 'Resource Updated successfully');
+
+                    die;
+                    // redirect('/resources', 'refresh');
+                } else {
+                    $this->session->set_flashdata('error', 'Resource Updated successfully');
+                }
             }
-            print_r($this->input->post('submit'));
-            echo "show";
         }
 
         $this->template->set('title', 'Resources');
