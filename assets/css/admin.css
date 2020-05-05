@@ -499,6 +499,10 @@
     padding:0
   }
 
+  .p-30{
+    padding:30px
+  }
+
   .pt-10{
     padding-top: 10px;
   }
@@ -514,15 +518,40 @@
   .mt-10{
     margin-top: 10px;
   }
+  
+  .mt-25{
+    margin-top: 25px;
+  }
 
   .mt-50{
     margin-top: 50px;
+  }
+
+  .mb-10{
+    margin-bottom: 10px;
+  }
+
+  .mr-10{
+    margin-right: 10px;
   }
 
   .f-24{
     font-size: 24px;
   }
 
+  .f-12{
+    font-size: 12px;
+  }
+
   .buttons-right{
     margin-top: 50px;
+  }
+
+  .form-document{
+    margin-top:25px;
+  }
+
+  .topic{
+    color: #FFFFFF;
+    background-color: #4CAF50 !important;
   }

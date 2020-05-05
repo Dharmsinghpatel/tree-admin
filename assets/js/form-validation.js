@@ -17,10 +17,31 @@ $(document).ready(function () {
             image: {
                 required: function (ele) {
                     const file = $('#hidden_file');
-                    console.log($('#hidden_file').attr('value') > 0 && $('#hidden_file').attr('data-file-type'));
                     return !(file.attr('value') > 0 && file.attr('data-file-type') == 'image');
                 },
                 extension: 'png|jpg'
+            }
+        }
+    });
+
+    $('#add-document').validate({
+        // set validation rules for input fields
+        rules: {
+            title: {
+                required: true,
+            },
+            type: {
+                required: true,
+            },
+            content_type: {
+                required: true,
+            },
+            icon: {
+                required: function (ele) {
+                    const file = $('#icon_id');
+                    return !(file.attr('value') > 0);
+                },
+                extension: 'png|jpg|jpeg'
             }
         }
     });

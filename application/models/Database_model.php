@@ -8,7 +8,7 @@ class Database_model extends CI_Model
         $this->tables = array('resource' => 'resources', 'files' => 'files');
     }
 
-    public function do_upload($file, $file_name, $type, $is_file = true)
+    public function do_upload($file, $file_name, $type = 'image', $is_file = true)
     {
         $insert_id = null;
         if (!$is_file) {
@@ -39,35 +39,59 @@ class Database_model extends CI_Model
         }
     }
 
-    public function get_file_detail($id)
+    public function get_file_detail($id, $desc = false)
+    {
+        $file = array();
+        $content = '';
+        if (!empty($id) && !$desc) {
+            $file = $this->db->select('*')->where('id', $id)->get($this->tables['files'])->row();
+            $config = $this->config->item('image');
+
+            switch ($file->type) {
+                case 'image':
+                    $path = site_url($config['upload_path']) . "/" . $file->unique_name;
+                    $content = '<div class="col-6">
+                                        <label>' . $file->file_name . '</label>
+                                        <img src="' . $path . '" class="w-100">
+                                    </div>';
+                    break;
+                case 'site':
+                    $content = '<div class="col-12">
+                                        <label>Site Url</label>
+                                        <input class="form-control" value="' . $file->unique_name . '" readonly>
+                                    </div>';
+                    break;
+                case 'video':
+                    $content = '<div class="col-6">
+                                        <label>Video Url</label>
+                                        <input class="form-control" value="' . $file->unique_name . '" readonly>
+                                </div>';
+                    break;
+                default:
+                    $content = 'This type data not availble.';
+                    break;
+            }
+        } else {
+            $rs = $this->db->select('rs.description')->where('file_id', $id)->get($this->tables['resource'] . ' rs')->row();
+            $content = !empty($rs) ?
+                '<div class="">
+                    <label>Description</label>
+                    <textarea class="form-control" rows="3" readonly>' . $rs->description . '</textarea>
+                </div>' : '';
+        }
+
+        return $content;
+    }
+
+    public function get_file($id)
     {
         $file = array();
         if (!empty($id)) {
-            $file = $this->db->select('*')->where('id', $id)->get($this->tables['files'])->row();
-
-            $config = $this->config->item($file->type);
-
-            $content = '';
-            switch ($file->type) {
-                case 'image': {
-                        $path = site_url($config['upload_path']) . "/" . $file->unique_name;
-                        $content = '<img src="' . $path . '" class="w-100">';
-                        break;
-                    }
-                case 'site': {
-                        $content = $file->unique_name;
-                        break;
-                    }
-
-                case 'video': {
-                        $content = $file->unique_name;
-                        break;
-                    }
-                default: {
-                        $content = 'This type data not availble.';
-                    }
-            }
+            $file = $this->db->select('*')
+                ->where('id', $id)
+                ->get($this->tables['files'])
+                ->row();
         }
-        return $content;
+        return $file;
     }
 }
