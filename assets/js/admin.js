@@ -38,7 +38,9 @@ $(function () {
    */
   sort($("#resources_list > tbody"));
   sort($("#documents_list > tbody"))
+  sort($("#carousel_list > tbody"))
   sort_content($("#aditional_sort"))
+  sort_content($("#chart_sort"))
 
   function sort($sortable) {
     $sortable.sortable({
@@ -118,7 +120,7 @@ $(function () {
    * resource file
    */
 
-  $('select#type').unbind('change').on('change', (function () {
+  $('select#resource_type').unbind('change').on('change', (function () {
     let value = $(this).children(":selected").attr("value"),
 
       image = `<div class="form-group" id="image">
@@ -138,10 +140,10 @@ $(function () {
                     <input type="file" class="form-control p-0 border-0" id="video_thumbnail" name="video_thumbnail">
                 </div>
 
-                <div class="form-group" id="url">
-                    <label for="url">Link<span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="url" name="url" placeholder="http://..">
-                    <small class="text-danger"><?php echo form_error('url'); ?></small>
+                <div class="form-group" id="video_id">
+                    <label for="video_id">Video Id<span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="video_id" name="video_id" >
+                    <small class="text-danger"><?php echo form_error('video_id'); ?></small>
                 </div>`;
 
     switch (value) {
@@ -199,7 +201,7 @@ $(function () {
    * get resource
    */
 
-  $('select#add_content').change(function () {
+  $('select#add_resource').change(function () {
     let value = $(this).children(":selected").attr("value"),
       url = $(this).attr("data-url"),
       file_url = $(this).attr("data-file-url"),
@@ -324,4 +326,28 @@ jQuery(function ($) {
   for (let i = 1; i <= ckeditor.length; i++) {
     CKEDITOR.replace('description' + i);
   }
+});
+
+
+/**
+  * resource delete
+  */
+$(document).on('click', '.show', function (e) {
+  let url = $(this).attr("data-show-url");
+  e.preventDefault();
+
+  $.ajax({
+    url,
+    dataType: 'json',
+    type: 'GET',
+    success: (res) => {
+      if (res.status == 'success') {
+        $('#modal').modal('show');
+        $('#modal_label').html('Meassage');
+        $('#modal_body').html(res.html);
+        $('#btn_close').html('Close');
+        $('#btn-save').html('Done');
+      }
+    }
+  });
 });

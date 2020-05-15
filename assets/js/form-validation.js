@@ -7,19 +7,22 @@ $(document).ready(function () {
             title: {
                 required: true,
             },
-            type: {
+            resource_type: {
                 required: true,
             },
             url: {
                 required: true,
                 url: true
             },
+            video_id: {
+                required: true,
+            },
             image: {
                 required: function (ele) {
                     const file = $('#hidden_file');
                     return !(file.attr('value') > 0 && file.attr('data-file-type') == 'image');
                 },
-                extension: 'png|jpg'
+                extension: 'png|jpg|jpeg'
             }
         }
     });
@@ -30,15 +33,28 @@ $(document).ready(function () {
             title: {
                 required: true,
             },
-            type: {
-                required: true,
-            },
-            content_type: {
+            display_type: {
                 required: true,
             },
             icon: {
                 required: function (ele) {
                     const file = $('#icon_id');
+                    return !(file.attr('value') > 0);
+                },
+                extension: 'png|jpg|jpeg'
+            }
+        }
+    });
+
+    $('#add-carousel').validate({
+        // set validation rules for input fields
+        rules: {
+            title: {
+                required: true,
+            },
+            image: {
+                required: function (ele) {
+                    const file = $('#hidden_file');
                     return !(file.attr('value') > 0);
                 },
                 extension: 'png|jpg|jpeg'

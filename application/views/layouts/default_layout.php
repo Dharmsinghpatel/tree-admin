@@ -44,11 +44,11 @@
                 </div>
                 <div class="sidebar-header">
                     <div class="user-pic">
-                        <img class="img-responsive img-rounded" src="https://raw.githubusercontent.com/azouaoui-med/pro-sidebar-template/gh-pages/src/img/user.jpg" alt="User picture">
+                        <img class="img-responsive img-rounded" src="<?php echo isset($user) ? site_url('assets/uploads/images/') . '' . $user['unique_name'] : '' ?>" alt="User picture">
                     </div>
                     <div class="user-info">
-                        <span class="user-name">Jhon
-                            <strong>Smith</strong>
+                        <span class="user-name">
+                            <strong><?php echo isset($user) ? $user['name'] : '' ?></strong>
                         </span>
                         <span class="user-role">Administrator</span>
                         <span class="user-status">
@@ -77,23 +77,10 @@
                             <span>General</span>
                         </li>
                         <li class="sidebar-dropdown">
-                            <a href="#">
-                                <i class="fa fa-book"></i>
-                                <span>Documentation</span>
+                            <a href="<?php echo site_url('charts'); ?>">
+                                <i class="fa fa-chart-line"></i>
+                                <span>Charts</span>
                             </a>
-                            <div class="sidebar-submenu">
-                                <ul>
-                                    <li>
-                                        <a href="<?php echo site_url('documents'); ?>">Do you know</a>
-                                    </li>
-                                    <li>
-                                        <a href="<?php echo site_url('documents/list-documents/news'); ?>">News</a>
-                                    </li>
-                                    <li>
-                                        <a href="<?php echo site_url('documents/list-documents/document'); ?>">Reading Contents</a>
-                                    </li>
-                                </ul>
-                            </div>
                         </li>
                         <li>
                             <a href="<?php echo site_url('resources'); ?>">
@@ -101,47 +88,42 @@
                                 <span>Resources</span>
                             </a>
                         </li>
-
                         <li>
-                            <a href="#">
+                            <a href="<?php echo site_url('carousel/list-carousel'); ?>">
                                 <i class="fa fa-picture-o"></i>
-                                <span>carousel</span>
+                                <span>Carousel</span>
                             </a>
-                        </li>
-
-                        <li class="sidebar-dropdown">
-                            <a href="#">
-                                <i class="fa fa-chart-line"></i>
-                                <span>Charts</span>
-                            </a>
-                            <div class="sidebar-submenu">
-                                <ul>
-                                    <li>
-                                        <a href="#">Pie chart</a>
-                                    </li>
-                                    <li>
-                                        <a href="#">Line chart</a>
-                                    </li>
-                                    <li>
-                                        <a href="#">Bar chart</a>
-                                    </li>
-                                    <li>
-                                        <a href="#">Histogram</a>
-                                    </li>
-                                </ul>
-                            </div>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="<?php echo site_url('profile'); ?>">
                                 <i class="fa fa-user"></i>
                                 <span>Profile</span>
                             </a>
                         </li>
+
                         <li class="header-menu">
-                            <span>Extra</span>
+                            <span>Documentation</span>
+                        </li>
+                        <li>
+                            <a href="<?php echo site_url('documents'); ?>">
+                                <i class="fa fa-book"></i>
+                                <span>Do you know</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo site_url('documents/list-documents/news'); ?>">
+                                <i class="fa fa-book"></i>
+                                <span>News</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="<?php echo site_url('documents/list-documents/document'); ?>">
+                                <i class="fa fa-book"></i>
+                                <span>Reading Contents</span>
+                            </a>
                         </li>
 
-                        <li class="sidebar-dropdown">
+                        <!-- <li class="sidebar-dropdown">
                             <a href="#">
                                 <i class="fa fa-globe"></i>
                                 <span>Maps</span>
@@ -168,7 +150,7 @@
                                 <i class="fa fa-folder"></i>
                                 <span>Examples</span>
                             </a>
-                        </li>
+                        </li> -->
                     </ul>
                 </div>
                 <!-- sidebar-menu  -->
@@ -179,15 +161,15 @@
                     <i class="fa fa-bell"></i>
                     <span class="badge badge-pill badge-warning notification">3</span>
                 </a>
-                <a href="#">
+                <a href="<?php echo site_url('email'); ?>">
                     <i class="fa fa-envelope"></i>
-                    <span class="badge badge-pill badge-success notification">7</span>
+                    <span class="badge badge-pill badge-success notification"><?php echo isset($unread_msg) ? $unread_msg : 0 ?></span>
                 </a>
-                <a href="#">
+                <a href="<?php echo site_url('setting'); ?>">
                     <i class="fa fa-cog"></i>
                     <span class="badge-sonar"></span>
                 </a>
-                <a href="#">
+                <a href="<?php echo site_url('auth/logout'); ?>">
                     <i class="fa fa-power-off"></i>
                 </a>
             </div>
@@ -243,6 +225,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
 
+    <!-- charts -->
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+    <!-- toasts -->
     <script type="text/javascript">
         <?php if ($this->session->flashdata('success')) { ?>
             toastr.success("<?php echo $this->session->flashdata('success'); ?>");

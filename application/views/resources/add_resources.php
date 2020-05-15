@@ -10,23 +10,57 @@ defined('BASEPATH') or exit('No direct script access allowed');
 <form id="add-resources" method="POST" enctype="multipart/form-data">
     <div class="form-group">
         <label for="title">Title<span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="title" name="title" value="<?php echo isset($detail) ? $detail['content']->title : '' ?>" placeholder="Title">
+        <input type="text" class="form-control" id="title" name="title" value="<?php echo isset($detail) ? $detail['content']->title : '' ?>" placeholder="Title" autofocus>
         <small class="text-danger"><?php echo form_error('title'); ?></small>
     </div>
 
+    <div class="form-row">
+        <div class="col">
+            <div class="form-group">
+                <label for="product_type">Product Type<span class="text-danger">*</span></label>
+                <select class="form-control text-capitalize" id="product_type" name="product_type">
+                    <option value="<?php echo isset($detail) ? $detail['content']->product_type : '' ?>"><?php echo isset($detail) && !empty($detail['content']->product_type) ? $detail['content']->product_type : 'Select Product Type' ?></option>
+                    <option value="">Select Product Type</option>
+                    <option value="all">All</option>
+                    <option value="animal">Animal</option>
+                    <option value="crop">Crop</option>
+                    <option value="fertilizer">Fertilizer</option>
+                    <option value="pesticides">Pesticides</option>
+                </select>
+                <small class="text-danger"><?php echo form_error('product_type'); ?></small>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="form-group">
+                <label for="product_name">Product Name</label>
+                <input type="text" class="form-control" id="product_name" name="product_name" value="<?php echo isset($detail) ? $detail['content']->product_name : '' ?>" placeholder="Product Name">
+                <small class="text-danger"><?php echo form_error('product_name'); ?></small>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="form-group">
+                <label for="product_use">Product Use</label>
+                <input type="text" class="form-control" id="product_use" name="product_use" value="<?php echo isset($detail) ? $detail['content']->product_use : '' ?>" placeholder="Product Use">
+                <small class="text-danger"><?php echo form_error('product_use'); ?></small>
+            </div>
+        </div>
+    </div>
+
     <div class="form-group">
-        <label for="type">Type<span class="text-danger">*</span></label>
-        <select class="form-control" id="type" name="type">
-            <option value="<?php echo isset($detail) ? $detail['content']->type : '' ?>"><?php echo isset($detail) ? $detail['content']->type : 'Select Type' ?></option>
-            <option value="">Select Type</option>
+        <label for="resource_type">Resource Type<span class="text-danger">*</span></label>
+        <select class="form-control" id="resource_type" name="resource_type">
+            <option value="<?php echo isset($detail) ? $detail['content']->resource_type : '' ?>"><?php echo isset($detail) ? $detail['content']->resource_type : 'Select Resource Type' ?></option>
+            <option value="">Select Resource Type</option>
             <option value="image">Image</option>
             <option value="site">Site</option>
             <option value="video">Video</option>
         </select>
-        <small class="text-danger"><?php echo form_error('type'); ?></small>
+        <small class="text-danger"><?php echo form_error('resource_type'); ?></small>
     </div>
 
-    <input type="hidden" name="hidden_file" value="<?php echo isset($detail) ? $detail['content']->file_id : '' ?>" id="hidden_file" data-file-type="<?php echo isset($detail) ? $detail['content']->type : '' ?>">
+    <input type="hidden" name="hidden_file" value="<?php echo isset($detail) ? $detail['content']->file_id : '' ?>" id="hidden_file" data-file-type="<?php echo isset($detail) ? $detail['content']->resource_type : '' ?>">
 
     <input type="hidden" name="hidden_file_2" value="<?php echo isset($detail) ? $detail['content']->file_id_2 : '' ?>" id="hidden_file_2">
 

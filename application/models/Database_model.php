@@ -8,18 +8,27 @@ class Database_model extends CI_Model
         $this->tables = array('resource' => 'resources', 'files' => 'files');
     }
 
-    public function do_upload($file, $file_name, $type = 'image', $is_file = true)
+    public function do_upload($params)
     {
+        extract($params);
+        $file = isset($file) ? $file : array();
+        $file_name = isset($file_name) ? $file_name : '';
+        $file_type = isset($file_type) ? $file_type : 'image';
+        $is_file = isset($is_file) ? $is_file : true;
+        $file_id = isset($file_id) ? $file_id : null;
+
+
         $insert_id = null;
         if (!$is_file) {
-            $file_detail = array('file_name' => $file_name, 'unique_name' => $file, 'type' => $type, 'size' => strlen($file));
+
+            $file_detail = array('file_name' => $file_name, 'unique_name' => $file, 'file_type' => $file_type, 'size' => strlen($file));
             $this->db->insert($this->tables['files'], $file_detail);
             $insert_id = $this->db->insert_id();
             return $insert_id;
         }
 
         if ($is_file) {
-            $config = $this->config->item($type);
+            $config = $this->config->item($file_type);
             $this->load->library('upload');
             $this->upload->initialize($config);
 
@@ -30,7 +39,14 @@ class Database_model extends CI_Model
                 $res = array('upload_data' => $this->upload->data());
                 $file_arr = $res['upload_data'] ? $res['upload_data'] : array();
                 if (!empty($file_arr)) {
-                    $file_detail = array('file_name' => $file_arr['orig_name'], 'unique_name' => $file_arr['file_name'], 'type' => $type, 'size' => $file_arr['file_size']);
+                    if (isset($file_id) && !empty($file_id)) {
+                        $file = $this->db->select('unique_name')
+                            ->where('id', $file_id)
+                            ->get($this->tables['files'])->row();
+
+                        !empty($file) ? unlink($config['upload_path'] . '' . $file->unique_name) : '';
+                    }
+                    $file_detail = array('file_name' => $file_arr['orig_name'], 'unique_name' => $file_arr['file_name'], 'file_type' => $file_type, 'size' => $file_arr['file_size']);
                     $this->db->insert($this->tables['files'], $file_detail);
                     $insert_id = $this->db->insert_id();
                 }
@@ -47,7 +63,7 @@ class Database_model extends CI_Model
             $file = $this->db->select('*')->where('id', $id)->get($this->tables['files'])->row();
             $config = $this->config->item('image');
 
-            switch ($file->type) {
+            switch ($file->file_type) {
                 case 'image':
                     $path = site_url($config['upload_path']) . "/" . $file->unique_name;
                     $content = '<div class="col-6">

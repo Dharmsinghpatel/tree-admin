@@ -11,14 +11,14 @@ class Documents_model extends CI_Model
 
     function get_documents($content_type)
     {
-        $resources = $this->db->select('dc.id,dc.title,dc.is_topic,dc.created,dc.updated')
+        $documents = $this->db->select('dc.id,dc.title,dc.is_topic,dc.created,dc.updated')
             ->order_by('position', 'asc')
-            ->where(array('is_topic' => null, 'type' => $content_type))
+            ->where(array('is_topic' => null, 'display_type' => $content_type))
             ->get($this->tables['document'] . ' dc');
 
         $document_list = array();
-        if (!empty($resources->result_array())) {
-            foreach ($resources->result_array() as $key => $resource) {
+        if (!empty($documents->result_array())) {
+            foreach ($documents->result_array() as $key => $resource) {
                 $topics_id = $this->db->select('ct.topic_id')
                     ->order_by('ct.position', 'asc')
                     ->where(array('ct.document_id' => $resource['id'], 'ct.topic_id !=' => null))
@@ -38,9 +38,7 @@ class Documents_model extends CI_Model
                 }
             }
         }
-        // p($document_list);
-        // die;
-        return array($resources, $document_list);
+        return array($documents, $document_list);
     }
 
     function add_documents($params)
@@ -56,20 +54,20 @@ class Documents_model extends CI_Model
         }
 
         if (isset($file['icon']) && !empty($file['icon']['name'])) {
-            $icon_id = $this->database->do_upload($file['icon'], 'icon');
+            $icon_id = $this->database->do_upload(array('file' => $file['icon'], 'file_name' => 'icon'));
             $icon_id = is_numeric($icon_id) ? $icon_id : null;
         }
 
         $data = array(
             'title' => $title,
-            'type' => $content_type,
+            'display_type' => $display_type,
             'icon' => $icon_id
         );
 
         $data_class = array(
-            'type' => $type,
-            'name' => $name,
-            'use_in' => $use_in,
+            'product_type' => $product_type,
+            'product_name' => $product_name,
+            'product_use' => $product_use,
             'document_id' => $document_id
         );
 
@@ -85,13 +83,12 @@ class Documents_model extends CI_Model
                 ->update($this->tables['classification'], $data_class);
 
             //delete description and files
-            $this->db->where(array('document_id' => $document_id, 'type !=' => 'topic'))
-                // $this->db->where('document_id = "' . $document_id . '" AND type != "topic" ')
+            $this->db->where(array('document_id' => $document_id, 'content_type !=' => 'topic'))
                 ->delete($this->tables['contents']);
 
             //delete document/topic
             $topics  = $this->db->select('ct.topic_id')
-                ->where(array('document_id' => $document_id, 'type' => 'topic'))
+                ->where(array('document_id' => $document_id, 'content_type' => 'topic'))
                 ->get($this->tables['contents'] . ' ct')->result_array();
             $topics_id = array_column($topics, 'topic_id');
 
@@ -129,7 +126,7 @@ class Documents_model extends CI_Model
 
                     if (array_key_exists('0', $document) && !empty($document[0][0])) {
                         $temp['resource_id'] = (int) $document[0][0];
-                        $temp['type'] = 'file';
+                        $temp['content_type'] = 'file';
                         array_push($documents_row, $temp);
                     } else if (array_key_exists('1', $document) && !empty($document[1][0])) {
                         $topic_content = array(
@@ -144,7 +141,7 @@ class Documents_model extends CI_Model
                         } else {
                             $this->db->insert($this->tables['document'], $topic_content);
                             $temp['topic_id'] = $this->db->insert_id();
-                            $temp['type'] = 'topic';
+                            $temp['content_type'] = 'topic';
                             $temp['description'] = $document[1][0];
                             array_push($documents_row, $temp);
                         }
@@ -152,7 +149,7 @@ class Documents_model extends CI_Model
                         $topic_index += 1;
                     } else if ((array_key_exists('2', $document)) && !empty($document[2][0])) {
                         $temp['description'] = $document[2][0];
-                        $temp['type'] = 'description';
+                        $temp['content_type'] = 'description';
                         array_push($documents_row, $temp);
                     }
                 }
@@ -194,12 +191,12 @@ class Documents_model extends CI_Model
     {
         $document = array();
         if (!empty($id)) {
-            $document['general_detail'] = $this->db->select('dc.id, dc.title, dc.type as content_type, dc.icon, cl.type as cl_type, cl.name, cl.use_in')
-                ->join('classification cl', 'cl.document_id = dc.id', 'left')
+            $document['general_detail'] = $this->db->select('dc.id, dc.title, dc.display_type, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use')
+                ->join($this->tables['classification'] . ' cl', 'cl.document_id = dc.id', 'left')
                 ->where('dc.id', $id)
                 ->get($this->tables['document'] . ' dc')->row();
 
-            $resources = $this->db->select('ct.description, ct.resource_id, ct.topic_id, ct.type as resource_type')
+            $resources = $this->db->select('ct.description, ct.resource_id, ct.topic_id, ct.content_type as resource_type')
                 ->order_by('position', 'asc')
                 ->where('document_id', $id)
                 ->get($this->tables['contents'] . ' ct')->result_array();
@@ -244,5 +241,15 @@ class Documents_model extends CI_Model
             }
         }
         return $status;
+    }
+
+    function get_document_detail($id = null)
+    {
+        $where = !empty($id) ? array('dc.id' => $id) : array('dc.id !=' => null);
+        return $this->db->select('dc.id,dc.title')
+            ->order_by('position', 'asc')
+            ->where($where)
+            ->get($this->tables['document'] . ' dc')
+            ->result_array();
     }
 }

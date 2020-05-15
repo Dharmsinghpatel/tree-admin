@@ -24,6 +24,7 @@ class Documents extends CI_Controller
     public function __construct()
     {
         Parent::__construct();
+
         $this->load->model('documents_model', 'document');
         $this->load->model('resources_model', 'resource');
     }
@@ -60,7 +61,7 @@ class Documents extends CI_Controller
                 'add_path' => 'documents/add-documents',
                 'add_title' => 'Add News',
                 'datatable_id' => 'documents_list',
-                'data_url' => 'documents/get-documents/document',
+                'data_url' => 'documents/get-documents/news',
                 'data_url_sort' => 'documents/sort_documents'
             )
         );
@@ -136,27 +137,29 @@ class Documents extends CI_Controller
             $data['detail'] = $this->document->get_detail($id);
         }
 
+
+
         $form = $this->input->post();
         $form['file'] = $_FILES;
 
         if (!empty($form['submit']) || !empty($form['add_more'])) {
+
             $validation_rules = $this->config->item('document_form');
             $this->form_validation->set_rules($validation_rules);
+
             if ($this->form_validation->run() == true) {
 
                 $status = $this->document->add_documents($form);
                 $toast = !empty($id) ? 'Updated' : 'Added';
-
                 if ($status) {
                     $this->session->set_flashdata('success', 'Resource ' . $toast . ' successfully');
-                    $redirect = !empty($form['add_more']) ? '/documents/add-documents' : '/documents/list-documents/' . $form['content_type'] . '';
+                    $redirect = !empty($form['add_more']) ? '/documents/add-documents' : '/documents/list-documents/' . $form['display_type'] . '';
                     redirect(site_url($redirect), 'refresh');
                 } else {
                     $this->session->set_flashdata('error', 'Resource ' . $toast . ' successfully');
                 }
             }
         }
-
         $this->template->set('title', 'Documents');
         $this->template->load('default_layout', 'contents', 'documents/add_documents', $data);
     }

@@ -1,0 +1,1 @@
+CREATE TABLE `agriarbor`.`files` ( `id` INT NOT NULL AUTO_INCREMENT , `file_name` VARCHAR(250) NOT NULL , `unique_name` VARCHAR(500) NOT NULL , `size` SMALLINT NOT NULL , `type` ENUM('image','site','video') NOT NULL , PRIMARY KEY (`id`)) ENGINE = InnoDB;

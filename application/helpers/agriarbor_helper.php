@@ -1,14 +1,5 @@
 <?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
-/**
- * testing function
- */
-if (!function_exists('p')) {
-    function p($value)
-    {
-        echo '<pre>', print_r($value), '</pre>';
-    }
-}
 
 /**
  * use for create url
@@ -107,10 +98,10 @@ if (!function_exists('render_video')) {
                     </div>
                 </div>
 
-                <div class="form-group" id="url">
-                    <label for="url">Link<span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="url" name="url" value="' . $file->unique_name . '" placeholder="http://..">
-                    <small class="text-danger"><?php echo form_error("url"); ?></small>
+                <div class="form-group" id="video_id">
+                    <label for="video_id">Video Id<span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="video_id" name="video_id" value="' . $file->unique_name . '" >
+                    <small class="text-danger"><?php echo form_error("video_id"); ?></small>
                 </div>';
     }
 }
@@ -177,11 +168,10 @@ if (!function_exists('render_topic')) {
 if (!function_exists('render_files')) {
     function render_files($resource, $resource_detail)
     {
-        return '
-        <div class="form-row form-document">
+        return '<div class="form-row form-document">
             <input type="hidden" name="documents[][0][]" value="' . $resource['resource_id'] . '">
                 <div class="col-4">
-                    ' . get_resource($resource_detail->type == "video" ? $resource_detail->file_id_2 : $resource_detail->file_id) . '
+                    ' . get_resource($resource_detail->resource_type == "video" ? $resource_detail->file_id_2 : $resource_detail->file_id) . '
                 </div>
                 <div class="col-7">
                         ' . get_resource($resource_detail->file_id, true) . '
@@ -198,5 +188,139 @@ if (!function_exists('render_files')) {
                 </div>
             </div>
         ';
+    }
+}
+
+if (!function_exists('render_email_modal')) {
+    function render_email_modal($data)
+    {
+        return '<div class="col">
+                    <div class="form-group">
+                        <label>First Name<span class="text-danger">*</span></label>
+                        <p class="font-weight-bold">' . $data->first_name . '</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <p class="font-weight-bold">'  . $data->last_name . '</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Email<span class="text-danger">*</span></label>
+                        <p class="font-weight-bold">'  . $data->email . '</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Comment<span class="text-danger">*</span></label>
+                        <p class="font-weight-bold">'  . $data->comment  . '</p>
+                    </div>
+                </div>';
+    }
+}
+
+/**
+ * encryption methods
+ */
+
+if (!function_exists('encrypt')) {
+    function encrypt($value, $is_sha1 = false)
+    {
+        if (!empty($value)) {
+            $ci = &get_instance();
+            $value = $is_sha1 ? sha1($value) : $value;
+            $value = $ci->encryption->encrypt($value);
+        }
+        return $value;
+    }
+}
+
+/**
+ * decrypt method
+ */
+if (!function_exists('decrypt')) {
+    function decrypt($value)
+    {
+
+        if (!empty($value)) {
+            $ci = &get_instance();
+            $value = $ci->encryption->decrypt($value);
+        }
+        return $value;
+    }
+}
+
+/**
+ * check password
+ */
+
+if (!function_exists(('check_password'))) {
+    function check_password($save_pass, $login_pass)
+    {
+        return decrypt($save_pass) === trim(sha1($login_pass));
+    }
+}
+
+/**
+ * check login
+ */
+if (!function_exists(('is_logged_in'))) {
+    function is_logged_in()
+    {
+        // Get current CodeIgniter instance
+        $CI = &get_instance();
+        // We need to use $CI->session instead of $this->session
+        $user = $CI->session->userdata('user_data');
+        if (!isset($user)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+}
+
+/**
+ * cut string
+ */
+if (!function_exists(('cut_text'))) {
+    function cut_text($text, $length = 250)
+    {
+        if (strlen($text) > $length) {
+            return substr($text, 0, $length) . '...';
+        }
+        return $text;
+    }
+}
+
+/**
+ * secure post api to misused
+ */
+if (!function_exists(('convet_secure_input'))) {
+    function convet_secure_input($data, $is_array = false)
+    {
+        if (!$is_array) {
+            return trim(htmlspecialchars($data, ENT_QUOTES));
+        }
+
+        $secure_data = array();
+        foreach ($data as $key => $value) {
+            $secure_data[$key] = trim(htmlspecialchars($value, ENT_QUOTES));
+        }
+        return $secure_data;
+    }
+}
+
+/**
+ * testing function
+ */
+if (!function_exists('p')) {
+    function p($value)
+    {
+        echo '<pre>', print_r($value), '</pre>';
+    }
+}
+/**
+ * testing function
+ */
+if (!function_exists('d')) {
+    function d($value)
+    {
+        echo '<pre>', var_dump($value), '</pre>';
     }
 }

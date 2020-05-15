@@ -4,29 +4,13 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Resources extends CI_Controller
 {
-
-    /**
-     * Index Page for this controller.
-     *
-     * Maps to the following URL
-     * 		http://example.com/index.php/welcome
-     *	- or -
-     * 		http://example.com/index.php/welcome/index
-     *	- or -
-     * Since this controller is set as the default controller in
-     * config/routes.php, it's displayed at http://example.com/
-     *
-     * So any other public methods not prefixed with an underscore will
-     * map to /index.php/welcome/<method_name>
-     * @see https://codeigniter.com/user_guide/general/urls.html
-     */
-
     public function __construct()
     {
         Parent::__construct();
+
         $this->load->model("resources_model", "resource");
         $this->load->model('database_model', 'database');
-        $this->load->helper('url');
+        // $this->load->helper('url');
     }
 
     public function index()
@@ -46,8 +30,6 @@ class Resources extends CI_Controller
     {
         // Datatables Variables
         $draw = intval($this->input->get("draw"));
-        $start = intval($this->input->get("start"));
-        $length = intval($this->input->get("length"));
 
         $resources = $this->resource->get_resources();
         $data = array();
@@ -60,7 +42,7 @@ class Resources extends CI_Controller
                 "DT_RowId" => $r['id'],
                 $i,
                 $r['title'],
-                $r['type'],
+                $r['resource_type'],
                 '<a class="mr-10" href="' . $edit_link . '">
                     <button class="btn btn-outline-primary ">Edit</button>
                 </a> 
@@ -82,7 +64,6 @@ class Resources extends CI_Controller
 
         echo json_encode($output);
     }
-
 
     public function add_resource($id = null)
     {
@@ -108,7 +89,7 @@ class Resources extends CI_Controller
                     $redirect = !empty($form['add_more']) ? '/resources/add-resource' : '/resources';
                     redirect(site_url($redirect), 'refresh');
                 } else {
-                    $this->session->set_flashdata('error', 'Resource ' . $toast . ' successfully');
+                    $this->session->set_flashdata('error', 'Resource ' . $toast . ' Failed');
                 }
             }
         }
