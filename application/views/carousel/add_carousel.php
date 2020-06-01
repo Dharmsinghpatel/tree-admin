@@ -17,7 +17,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <div class="form-row">
         <div class="col-6">
             <div class="form-group">
-                <label for="link">link</label>
+                <label for="link">Link</label>
                 <input type="text" class="form-control" id="link" name="link" value="<?php echo isset($detail) ? $detail['content']->link : '' ?>" placeholder="Link">
                 <small class="text-danger"><?php echo form_error('link'); ?></small>
             </div>
@@ -27,12 +27,30 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 <label>Document</label>
                 <select class="form-control" name="document_id">
                     <option value="">Please select</option>
-                    <option value="<?php echo isset($detail) ? $detail['content']->document_id : '' ?>" selected><?php echo isset($detail) ? $detail['content']->document_id : 'Please select' ?></option>
-                    <?php echo $options ?>
+
+                    <?php echo empty($options) ? '' : $options; ?>
                 </select>
             </div>
         </div>
     </div>
+
+    <div class="form-row">
+        <div class="col-6">
+            <div class="form-group">
+                <label for="start_date">Start Date</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" value="<?php echo isset($detail) ? $detail['content']->start_date : '' ?>" placeholder="Start Date">
+                <small class="text-danger"><?php echo form_error('start_date'); ?></small>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="form-group">
+                <label for="end_date">End Date</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" value="<?php echo isset($detail) ? $detail['content']->end_date : '' ?>" placeholder="Start Date">
+                <small class="text-danger"><?php echo form_error('end_date'); ?></small>
+            </div>
+        </div>
+    </div>
+
     <div class="form-group <?php echo isset($detail) && $detail['content']->file_id ? 'd-none' : '' ?>">
         <label for="image">Image</label>
         <input type="file" class="form-control p-0 border-0" id="image" name="image" value="<?php echo isset($detail) ? $detail['content']->file_id : '' ?>" placeholder="Image">
@@ -54,7 +72,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     </div>
 
     <div class="mt-50 row">
-        <a href="<?php echo site_url('carousel/list-carousel') ?>" class="btn btn-outline-dark">Cancel</a>
+        <a href="<?php echo site_url('carousel/list-carousel/' . $is_notification) ?>" class="btn btn-outline-dark">Cancel</a>
         <div class="ml-auto">
             <button type="submit" id="add_more" name="add_more" value="add-more" class="btn btn-outline-dark mr-10 <?php echo isset($detail) ? ($detail['content']->id ? 'd-none' : '') : '' ?> ">Add More</button>
             <button type="submit" id="submit" name="submit" value="submit" class="btn btn-primary "><?php echo isset($detail) ? ($detail['content']->id ? 'Edit' : 'Add') : 'Add' ?> </button>

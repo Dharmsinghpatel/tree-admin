@@ -36,6 +36,18 @@ $config = array(
             'label' => 'Title',
             'rules' => array('trim', 'required'),
             'errors' =>  'You must provide a %s.',
+        ),
+        array(
+            'field' => 'start_date',
+            'label' => 'Start Date',
+            'rules' => array('trim', 'required'),
+            'errors' =>  'You must provide a %s.',
+        ),
+        array(
+            'field' => 'end_date',
+            'label' => 'End Date',
+            'rules' => array('trim', 'required'),
+            'errors' =>  'You must provide a %s.',
         )
     ),
     "profile_form" => array(

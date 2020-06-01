@@ -21,7 +21,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 <select class="form-control text-capitalize" id="product_type" name="product_type">
                     <option value="<?php echo isset($detail) ? $detail['content']->product_type : '' ?>"><?php echo isset($detail) && !empty($detail['content']->product_type) ? $detail['content']->product_type : 'Select Product Type' ?></option>
                     <option value="">Select Product Type</option>
-                    <option value="all">All</option>
+                    <option value="none">None</option>
                     <option value="animal">Animal</option>
                     <option value="crop">Crop</option>
                     <option value="fertilizer">Fertilizer</option>

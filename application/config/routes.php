@@ -54,6 +54,8 @@ $route['default_controller'] = 'documents';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+$route['assets/js/(:any)'] = 'Assets/js/$1';
+
 // document routes
 $route['documents/list-documents'] = 'documents/list_documents';
 $route['documents/list-documents/(:any)'] = 'documents/list_documents/$1';
@@ -61,7 +63,8 @@ $route['documents/get-documents'] = 'documents/get_documents';
 $route['documents/get-documents/(:any)'] = 'documents/get_documents/$1';
 $route['documents/add-documents'] = 'documents/add_documents';
 $route['documents/add-documents/(:any)'] = 'documents/add_documents/$1';
-$route['documents/delete-document/(:any)/(:any)'] = 'documents/delete_document/$1/$2';
+$route['documents/delete-document/(:num)'] = 'documents/delete_document/$1';
+$route['documents/delete-document/(:num)/(:any)'] = 'documents/delete_document/$1/$2';
 
 //resource routes
 $route['resources/get-resources'] = 'resources/get_resources';
@@ -76,10 +79,10 @@ $route['resources/get-resource-content'] = 'resources/get_resource_content';
 $route['charts'] = 'charts';
 
 //carousel routes
-$route['carousel/list-carousel'] = 'carousel/list_carousel';
-$route['carousel/add-carousel'] = 'carousel/add_carousel';
+$route['carousel/list-carousel/(:num)'] = 'carousel/list_carousel/$1';
 $route['carousel/add-carousel/(:num)'] = 'carousel/add_carousel/$1';
-$route['carousel/get-carousel'] = 'carousel/get_carousel';
+$route['carousel/add-carousel/(:num/(:num))'] = 'carousel/add_carousel/$1/$2';
+$route['carousel/get-carousel/(:num)'] = 'carousel/get_carousel/$1';
 $route['carousel/delete-carousel/(:num)'] = 'carousel/delete_carousel/$1';
 
 //auth routes

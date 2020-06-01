@@ -10,6 +10,7 @@ class Resources extends CI_Controller
 
         $this->load->model("resources_model", "resource");
         $this->load->model('database_model', 'database');
+        $this->load->model('documents_model', 'document');
         // $this->load->helper('url');
     }
 
@@ -21,7 +22,13 @@ class Resources extends CI_Controller
 
     public function list_resources()
     {
-        $data = array('title' => 'Resources List', 'add_path' => 'resources/add-resource', 'datatable_id' => 'resources_list', 'data_url' => 'resources/get-resources', 'data_url_sort' => 'resources/sort_resources');
+        $data = array(
+            'title' => 'Resources List',
+            'add_path' => 'resources/add-resource',
+            'datatable_id' => 'resources_list',
+            'data_url' => 'resources/get-resources',
+            'data_url_sort' => 'resources/sort_resources'
+        );
         $this->template->set('title', 'List Resources');
         $this->template->load('default_layout', 'contents', 'resources/list_resources', $data);
     }
@@ -43,6 +50,7 @@ class Resources extends CI_Controller
                 $i,
                 $r['title'],
                 $r['resource_type'],
+                $r['created'],
                 '<a class="mr-10" href="' . $edit_link . '">
                     <button class="btn btn-outline-primary ">Edit</button>
                 </a> 
@@ -50,7 +58,6 @@ class Resources extends CI_Controller
                     <button class="btn btn-outline-secondary delete" data-delete-url="' . $delete_link . '" ><span class="fa fa-trash-o f-24"></span></button>
                 </a>
                 '
-
             );
             $i += 1;
         }
@@ -80,6 +87,7 @@ class Resources extends CI_Controller
         if (!empty($form['submit']) || !empty($form['add_more'])) {
             $validation_rules = $this->config->item('resources_form');
             $this->form_validation->set_rules($validation_rules);
+
             if ($this->form_validation->run() == true) {
                 $status = $this->resource->add_resources($form);
                 $toast = !empty($id) ? 'Updated' : 'Added';
@@ -122,7 +130,12 @@ class Resources extends CI_Controller
         $data = $this->input->post('data');
         $res = array('status' => 'error', 'resources' => array());
         if (isset($data['type']) && !empty($data['type'])) {
-            $res = $this->resource->get_resource_content($data['type']);
+            if ($data['type'] != 'document') {
+                $res = $this->resource->get_resource_content($data['type']);
+            } else {
+                $data = $this->document->get_document_detail();
+                $res = array('status' => 'success', 'documents' => $data);
+            }
         }
         echo json_encode($res);
     }

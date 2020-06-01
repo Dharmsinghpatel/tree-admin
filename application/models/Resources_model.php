@@ -11,7 +11,7 @@ class Resources_model extends CI_Model
 
     function get_resources()
     {
-        $resources = $this->db->select('rs.id,rs.title,rs.resource_type')
+        $resources = $this->db->select('rs.id,rs.title,rs.resource_type, rs.created, rs.updated')
             ->order_by('position')
             ->get($this->tables['resource'] . ' rs');
         return $resources;
@@ -142,8 +142,28 @@ class Resources_model extends CI_Model
 
     function delete_resource($id)
     {
+        $this->db->trans_start();
+        $this->db->trans_strict(FALSE);
+
+        $resource_detail  = $this->db->select('rs.file_id, rs.file_id_2')
+            ->where(array('rs.id' => $id))
+            ->get($this->tables['resource'] . ' rs')->row();
+
+        $this->db->where('resource_id', $id)
+            ->delete($this->tables['classification']);
+
+        $this->database->unlink_file($resource_detail->file_id);
+        $this->database->unlink_file($resource_detail->file_id_2);
+
         $res = $this->db->where('id', $id)
             ->delete($this->tables['resource']);
+
+        $this->db->trans_complete();
+        if ($this->db->trans_status() === FALSE) {
+            $this->db->trans_rollback();
+            return 'error';
+        }
+
         return $res ? 'success' : 'error';
     }
 
@@ -159,8 +179,8 @@ class Resources_model extends CI_Model
 
     function chart()
     {
-        $products = array('animal', 'crop', 'fertilizer', 'pesticides', 'none');
-        $displays = array('info', 'news', 'document', 'video', 'dashboard');
+        $products = array('animal', 'crop', 'fertilizer', 'pesticides', 'plant', 'none');
+        $displays = array('info', 'news', 'blog', 'video', 'dashboard');
         $chart_data = array();
 
         $pariod = 365;
@@ -179,11 +199,6 @@ class Resources_model extends CI_Model
                     ->where($cod1)
                     ->get($this->tables['analytic'] . ' an')
                     ->result_array();
-
-                // p($chart);
-
-                // $date = new DateTime($analytic->created);
-
 
                 $j = 0;
                 for ($i = 0; $i <= $pariod; $i++) {

@@ -9,9 +9,13 @@ class Carousel_model extends CI_Model
         $this->load->model('database_model', 'database');
     }
 
-    function get_carousel()
+    function get_carousel($is_notification)
     {
+        $today = date('Y-m-d');
+        $where = !empty($is_notification) && $is_notification ? ('start_date > "' . $today . '" OR end_date < "' . $today . '"') : array('start_date <=' => $today, 'end_date >=' => $today);
+
         $resources = $this->db->select('ca.id,ca.title,ca.created,ca.updated')
+            ->where($where)
             ->order_by('ca.position')
             ->get($this->tables['carousel'] . ' ca');
         return $resources;
@@ -32,10 +36,13 @@ class Carousel_model extends CI_Model
             $file_id = $this->database->do_upload(array('file' => $file['image'], 'file_name' => 'image'));
         }
 
+
         $data = array(
             'title' => $title,
             'link' => $link,
             'file_id' => $file_id,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
             'description' => $description
         );
 
@@ -69,15 +76,14 @@ class Carousel_model extends CI_Model
     {
         $resource = array();
         $where = !empty($id) ? array('id' => $id) : array('id !=' => null);
-        $resource['content'] =  $this->db->select('ca.id, ca.title, ca.file_id, ca.link , ca.link as document_id, ca.description')
+        $resource['content'] =  $this->db->select('ca.id, ca.title, ca.file_id, ca.link , ca.link as document_id, ca.description,ca.start_date, ca.end_date')
             ->where($where)->get($this->tables['carousel'] . ' ca')->row();
 
         if (!empty($resource['content'])) {
             $rs = $resource['content'];
-            if (!empty($rs->link) && is_numeric($rs->link)) {
-                $rs->link = '';
-                $rs->document_id = $this->document->get_document_detail($id = $rs->document_id)[0]['title'];
-            } else
+            !empty($rs->link) && is_numeric($rs->link) ?
+                $rs->link = ''
+                :
                 $rs->document_id = '';
 
             $tr = '';

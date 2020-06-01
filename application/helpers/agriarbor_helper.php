@@ -130,21 +130,25 @@ if (!function_exists('render_description')) {
  */
 
 if (!function_exists('render_topic')) {
-    function render_topic($resource)
+    function render_topic($resource, $topic = 1)
     {
+        $label = ($topic == 1) ? 'Topic<span class="text-danger">*</span>' : 'Documents';
+        $is_readable = ($topic != 1) ? 'readonly' : '';
+        $hidden_name = ($topic == 1) ? 'exist_topics[]' : 'exist_documents[]';
+        // 
         return '
         <div class="form-row form-document">
             <div class="col-10">
                 <div class="form-group">
-                    <label>Topic<span class="text-danger">*</span></label>
-                    <input type="hidden" name="exist_topics[]" value="' . $resource['topic_id'] . '" >
-                    <input type="text" class="form-control" name="documents[][1][]" value="' . $resource['description'] . '" placeholder="">
+                    <label>' . $label . '</label>
+                    <input type="hidden" name="' . $hidden_name . '" value="' . $resource['topic_id'] . '" >
+                    <input type="text" class="form-control" name="documents[][' . $topic . '][]" value="' . $resource['description'] . '" placeholder="" ' . $is_readable . '>
                 </div>
             </div>
             <div class="col-1">
                 <div class="form-group text-center">
                     <label>Edit</label><br/>
-                    <a target="_blank" href="' . site_url("/documents/add-documents") . '/' . $resource["topic_id"] . '">
+                    <a target="_blank" class="link" href="' . site_url("/documents/add-documents") . '/' . $resource["topic_id"] . '">
                         <button class="btn btn-outline-secondary"><span class="fa fa-pencil-square-o f-24"></span></button>
                     </a>
                 </div>
@@ -307,6 +311,24 @@ if (!function_exists(('convet_secure_input'))) {
 }
 
 /**
+ * encrypt and dycrypt topic ids
+ */
+if (!function_exists(('custom_secure_data'))) {
+    function custom_secure_data($data, $encrypt = true)
+    {
+
+        $string_to_encrypt = "Te@#/?sis@123";
+        // $encrypted_string=openssl_encrypt($string_to_encrypt,"AES-128-ECB",$password);
+        // $decrypted_string=openssl_decrypt($encrypted_string,"AES-128-ECB",$password);
+
+        if ($encrypt) {
+            return openssl_encrypt($data, "AES-128-ECB", $string_to_encrypt);
+        }
+        return openssl_decrypt($data, "AES-128-ECB", $string_to_encrypt);
+    }
+}
+
+/**
  * testing function
  */
 if (!function_exists('p')) {
@@ -315,6 +337,7 @@ if (!function_exists('p')) {
         echo '<pre>', print_r($value), '</pre>';
     }
 }
+
 /**
  * testing function
  */

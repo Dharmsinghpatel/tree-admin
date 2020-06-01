@@ -19,21 +19,29 @@ class Carousel extends CI_Controller
         $this->list_carousel();
     }
 
-    public function list_carousel()
+    public function list_carousel($is_notification = 0)
     {
-        $data = array('title' => 'Carousel List', 'add_path' => 'carousel/add-carousel', 'datatable_id' => 'carousel_list', 'data_url' => 'carousel/get-carousel', 'data_url_sort' => 'carousel/sort_carousel');
+        $data = array(
+            'title' => 'Carousel List',
+            'add_path' => 'carousel/add-carousel/' . $is_notification . '',
+            'datatable_id' => 'carousel_list',
+            'data_url' => 'carousel/get-carousel/' . $is_notification . '',
+            'data_url_sort' => 'carousel/sort_carousel'
+        );
         $this->template->set('title', 'List Carousel');
         $this->template->load('default_layout', 'contents', 'carousel/list_carousel', $data);
     }
 
-    public function add_carousel($id = null)
+    public function add_carousel($is_notification = 0, $id = null)
     {
-        $data = array('title' => "Add Carousel");
+        $data = array('title' => "Add Carousel", 'is_notification' => $is_notification);
         $form = array();
 
+        $selected = '';
         if (!empty($id)) {
             $data['title'] = 'Edit Carousel';
             $data['detail'] = $this->carousel->get_detail($id);
+            $selected = $data['detail']['content']->document_id;
         }
 
         $form = $this->input->post();
@@ -42,20 +50,26 @@ class Carousel extends CI_Controller
 
         $ops = '';
         foreach ($documents as $key => $document) {
-            $ops .= '<option  value="' . $document['id'] . '">' . $document['title'] . '</option>';
+            if ($document['id'] == $selected) {
+                $ops .= '<option  selected value="' . $document['id'] . '">' . $document['title'] . '</option>';
+            } else {
+                $ops .= '<option  value="' . $document['id'] . '">' . $document['title'] . '</option>';
+            }
         }
+
         $data['options'] = $ops;
 
         if (!empty($form['submit']) || !empty($form['add_more'])) {
             $validation_rules = $this->config->item('carousel_form');
             $this->form_validation->set_rules($validation_rules);
+
             if ($this->form_validation->run() == true) {
                 $status = $this->carousel->add_carousel($form);
                 $toast = !empty($id) ? 'Updated' : 'Added';
 
                 if ($status) {
                     $this->session->set_flashdata('success', 'Carousel ' . $toast . ' successfully');
-                    $redirect = !empty($form['add_more']) ? '/carousel/add-carousel' : '/carousel';
+                    $redirect = !empty($form['add_more']) ? '/carousel/add-carousel/' . $is_notification  : '/carousel/list-carousel/' . $is_notification;
                     redirect(site_url($redirect), 'refresh');
                 } else {
                     $this->session->set_flashdata('error', 'Carousel ' . $toast . ' fail!');
@@ -67,17 +81,16 @@ class Carousel extends CI_Controller
         $this->template->load('default_layout', 'contents', 'carousel/add_carousel', $data);
     }
 
-    public function get_carousel()
+    public function get_carousel($is_notification = 0)
     {
-        // Datatables Variables
         $draw = intval($this->input->get("draw"));
 
-        $carousel = $this->carousel->get_carousel();
+        $carousel = $this->carousel->get_carousel($is_notification);
         $data = array();
 
         $i = 1;
         foreach ($carousel->result_array() as $r) {
-            $edit_link = site_url('/carousel/add-carousel/' . $r['id']);
+            $edit_link = site_url('/carousel/add-carousel/' . $is_notification . '/' . $r['id']);
             $delete_link = site_url('/carousel/delete-carousel/' . $r['id']);
             $data[] = array(
                 "DT_RowId" => $r['id'],

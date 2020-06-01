@@ -39,13 +39,7 @@ class Database_model extends CI_Model
                 $res = array('upload_data' => $this->upload->data());
                 $file_arr = $res['upload_data'] ? $res['upload_data'] : array();
                 if (!empty($file_arr)) {
-                    if (isset($file_id) && !empty($file_id)) {
-                        $file = $this->db->select('unique_name')
-                            ->where('id', $file_id)
-                            ->get($this->tables['files'])->row();
-
-                        !empty($file) ? unlink($config['upload_path'] . '' . $file->unique_name) : '';
-                    }
+                    $this->unlink_file($file_id);
                     $file_detail = array('file_name' => $file_arr['orig_name'], 'unique_name' => $file_arr['file_name'], 'file_type' => $file_type, 'size' => $file_arr['file_size']);
                     $this->db->insert($this->tables['files'], $file_detail);
                     $insert_id = $this->db->insert_id();
@@ -55,14 +49,33 @@ class Database_model extends CI_Model
         }
     }
 
+    public function unlink_file($file_id)
+    {
+
+        if (isset($file_id) && !empty($file_id)) {
+            $file = $this->db->select('unique_name, file_type')
+                ->where('id', $file_id)
+                ->get($this->tables['files'])->row();
+
+            if (!empty($file) && $file->file_type == 'image') {
+                $config = $this->config->item($file->file_type);
+                !empty($file) ? unlink($config['upload_path'] . '' . $file->unique_name) : '';
+            }
+
+            $res = $this->db->where('id', $file_id)
+                ->delete($this->tables['files']);
+            return $res > 0;
+        }
+    }
+
     public function get_file_detail($id, $desc = false)
     {
         $file = array();
         $content = '';
+
         if (!empty($id) && !$desc) {
             $file = $this->db->select('*')->where('id', $id)->get($this->tables['files'])->row();
             $config = $this->config->item('image');
-
             switch ($file->file_type) {
                 case 'image':
                     $path = site_url($config['upload_path']) . "/" . $file->unique_name;

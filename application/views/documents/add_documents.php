@@ -21,9 +21,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
             <option value="">Select Display Type</option>
             <option value="info">Info</option>
             <option value="news">News</option>
-            <option value="document">Reading Content</option>
+            <option value="blog">Blog</option>
         </select>
-        <small class="text-danger"><?php echo form_error('type'); ?></small>
+        <small class="text-danger"><?php echo form_error('display_type'); ?></small>
     </div>
 
     <div class="form-row">
@@ -33,7 +33,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 <select class="form-control text-capitalize" id="product_type" name="product_type">
                     <option value="<?php echo isset($detail) ? $detail['general_detail']->cl_type : '' ?>"><?php echo isset($detail) && !empty($detail['general_detail']->cl_type) ? $detail['general_detail']->cl_type : 'Select Product Type' ?></option>
                     <option value="">Select Product Type</option>
-                    <option value="all">All</option>
+                    <option value="none">None</option>
                     <option value="animal">Animal</option>
                     <option value="crop">Crop</option>
                     <option value="fertilizer">Fertilizer</option>
@@ -73,11 +73,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
         </div>
     </div>
 
-    <!-- <div class="form-group">
-        <label for="description">Description</label>
-        <textarea class="form-control description" id="description" rows="3" name="documents[][2][]"></textarea>
-    </div> -->
-
     <div id="aditional_sort">
         <?php echo isset($detail) ? $detail['resources'] : '' ?>
     </div>
@@ -89,7 +84,14 @@ defined('BASEPATH') or exit('No direct script access allowed');
             <option value="image">Image</option>
             <option value="video">Video</option>
             <option value="site">Site</option>
-            <option value="topic">Topic</option>
+            <?php
+            $options = '';
+            if (!isset($detail) || (isset($detail) && empty(($detail['general_detail']->is_topic)))) {
+                $options = '<option value="topic">Topic</option>
+             <option value="document">Document</option>';
+            }
+            echo $options;
+            ?>
             <option value="description">Description</option>
         </select>
     </div>
@@ -98,7 +100,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
         <a href="<?php echo site_url('documents/list-documents') ?>" class="btn btn-outline-dark">Cancel</a>
         <div class="ml-auto">
             <button type="submit" id="add_more" name="add_more" value="add-more" class="btn btn-outline-dark mr-10 <?php echo isset($detail) ? ($detail['general_detail']->id ? 'd-none' : '') : '' ?> ">Add More</button>
-            <button type="submit" id="submit" name="submit" value="submit" class="btn btn-primary ">Add</button>
+            <button type="submit" id="submit" name="submit" value="submit" class="btn btn-primary "><?php echo isset($detail) ? ($detail['general_detail']->id ? 'Edit' : 'Add') : 'Add' ?></button>
         </div>
     </div>
 </form>

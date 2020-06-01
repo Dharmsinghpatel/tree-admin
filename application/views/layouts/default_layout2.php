@@ -105,7 +105,7 @@
                         <li>
                             <a href="<?php echo site_url('documents'); ?>">
                                 <i class="fa fa-book"></i>
-                                <span>Info</span>
+                                <span>Do you know</span>
                             </a>
                         </li>
                         <li>
@@ -115,9 +115,9 @@
                             </a>
                         </li>
                         <li>
-                            <a href="<?php echo site_url('documents/list-documents/blog'); ?>">
+                            <a href="<?php echo site_url('documents/list-documents/document'); ?>">
                                 <i class="fa fa-book"></i>
-                                <span>Blog</span>
+                                <span>Reading Contents</span>
                             </a>
                         </li>
 
@@ -205,26 +205,34 @@
         <!-- Modal -->
 
     </div>
+    <!-- page-wrapper -->
 
-    <!-- modal and other component plugin -->
     <script src="<?php echo base_url(); ?>assets/js/jquery-3.5.0.min.js"></script>
     <script src="<?php echo base_url(); ?>assets/js/bootstrap.min.js"></script>
 
     <!-- datatable -->
-    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/jquery.dataTables.css1.10.20.css">
-    <script src="<?php echo base_url(); ?>assets/js/jquery.dataTables1.10.20.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/jquery-ui.min1.10.3.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+
 
     <!-- Validation JS file -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.js"></script> -->
     <script src="<?php echo base_url(); ?>assets/js/jquery.validate1.17.0.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/additional-methods.min.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/form-validation.js"></script>
 
-    <!-- Toastr -->
+    <!-- <script src="http://jqueryvalidation.org/files/dist/additional-methods.min.js"></script> -->
+
+    <script src="<?php echo base_url(); ?>assets/js/additional-methods.min.js"></script>
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script> -->
     <script src="<?php echo base_url(); ?>assets/js/toastr.min.js"></script>
-    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/toastr.min.css">
+
+    <!-- <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"> -->
+
+    <script src="<?php echo base_url(); ?>assets/css/toastr.min.css"></script>
 
     <!-- charts -->
+    <!-- <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script> -->
     <script src="<?php echo base_url(); ?>assets/js/canvasjs.min.js"></script>
 
     <!-- toasts -->

@@ -80,7 +80,6 @@ $(function () {
   function datatable_list() {
 
     let tag = document.getElementsByClassName('table')[0];
-    console.log('hi', tag);
     let table;
     if (tag) {
       let table_id = tag.id;
@@ -173,7 +172,9 @@ $(function () {
    * resource delete
    */
   $(document).on('click', '.delete', function (e) {
+    console.log('delete');
     let url = $(this).attr("data-delete-url");
+    console.log($('#modal'));
     $('#modal').modal('show');
     $('#modal_label').html('Delete');
     $('#modal_body').html('Do you want to delete this item!');
@@ -208,7 +209,7 @@ $(function () {
       ckeditor = $('.description') ? $('.description') : [],
       last_desc = ckeditor ? ckeditor.length + 1 : 1;
 
-    if (value != 'topic' && value != 'description') {
+    if (value != 'topic' && value != 'description' && value != 'document') {
       $.ajax({
         url,
         dataType: 'json',
@@ -283,6 +284,45 @@ $(function () {
       $('#aditional_sort').append(description);
       CKEDITOR.replace('description' + last_desc + '');
       CKEDITOR.add;
+    } else if (value == 'document') {
+      $.ajax({
+        url,
+        dataType: 'json',
+        method: 'POST',
+        data: { data: { type: value } },
+        success: function (res) {
+          if (res.status == 'success') {
+            let options = '';
+            console.log('documents>>', res);
+            res.documents.forEach(ele => {
+              options += '<option value="' + ele.id + '">' + ele.title + '</option>'
+            });
+            let html = `
+            <div class="form-row form-document">
+              <div class="col-4">
+                <div class="form-group">
+                  <label>`+ value + `</label>
+                    <select class="form-control" name="documents[][3][]">
+                        <option value="">Please select</option>
+                        `+ options + `
+                    </select>
+                  </div>
+                </div>
+                <div class="col-7">
+                </div>
+                <div class="col-1">
+                    <div class="form-group text-center">
+                        <label>Delete</label>
+                        <a class="delete-document" href="javascript:void(0)">
+                            <button class="btn btn-outline-secondary" ><span class="fa fa-trash-o f-24"></span></button>
+                        </a>
+                    </div>
+                </div>
+            </div>`;
+            $('#aditional_sort').append(html);
+          }
+        }
+      });
     }
   });
 
@@ -334,7 +374,7 @@ jQuery(function ($) {
   */
 $(document).on('click', '.show', function (e) {
   let url = $(this).attr("data-show-url");
-  e.preventDefault();
+  // e.preventDefault();
 
   $.ajax({
     url,
@@ -350,4 +390,17 @@ $(document).on('click', '.show', function (e) {
       }
     }
   });
+});
+
+
+/**
+ * 
+ * open achor link inside form and prevent default
+ */
+
+$(document).on('click', '.link', function (e) {
+  let url = $(this).attr("href");
+  e.preventDefault();
+  window.open(url);
+
 });

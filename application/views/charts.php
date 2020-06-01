@@ -23,13 +23,16 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Animal",
                 markerSize: 0,
+                color: 'black',
                 toolTipContent: "Animal View {y} on {x}",
+                color: 'black',
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['overall']['animal'], JSON_NUMERIC_CHECK); ?>
             }, {
                 type: "line",
                 name: "Crop",
                 markerSize: 0,
+                color: 'green',
                 toolTipContent: "Crop View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['overall']['crop'], JSON_NUMERIC_CHECK); ?>
@@ -37,16 +40,26 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Fertilizer",
                 markerSize: 0,
+                color: 'lightgreen',
                 toolTipContent: "Fertilizer View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['overall']['fertilizer'], JSON_NUMERIC_CHECK); ?>
             }, {
                 type: "line",
                 name: "Pesticides",
+                color: 'blue',
                 markerSize: 0,
                 toolTipContent: "Pesticides View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['overall']['pesticides'], JSON_NUMERIC_CHECK); ?>
+            }, {
+                type: "line",
+                name: "Plant",
+                markerSize: 0,
+                color: 'gray',
+                toolTipContent: "Plant View {y} on {x}",
+                showInLegend: true,
+                dataPoints: <?php echo json_encode($charts['overall']['plant'], JSON_NUMERIC_CHECK); ?>
             }]
         });
         overall.render();
@@ -80,6 +93,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Animal",
                 markerSize: 0,
+                color: 'black',
                 toolTipContent: "Animal View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['info']['animal'], JSON_NUMERIC_CHECK); ?>
@@ -87,6 +101,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Crop",
                 markerSize: 0,
+                color: 'green',
                 toolTipContent: "Crop View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['info']['crop'], JSON_NUMERIC_CHECK); ?>
@@ -94,6 +109,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Fertilizer",
                 markerSize: 0,
+                color: 'lightgreen',
                 toolTipContent: "Fertilizer View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['info']['fertilizer'], JSON_NUMERIC_CHECK); ?>
@@ -101,9 +117,18 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Pesticides",
                 markerSize: 0,
+                color: 'blue',
                 toolTipContent: "Pesticides View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['info']['pesticides'], JSON_NUMERIC_CHECK); ?>
+            }, {
+                type: "line",
+                name: "Plant",
+                markerSize: 0,
+                color: 'gray',
+                toolTipContent: "Plant View {y} on {x}",
+                showInLegend: true,
+                dataPoints: <?php echo json_encode($charts['overall']['plant'], JSON_NUMERIC_CHECK); ?>
             }]
         });
         info.render();
@@ -137,6 +162,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Animal",
                 markerSize: 0,
+                color: 'black',
                 toolTipContent: "Animal View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['news']['animal'], JSON_NUMERIC_CHECK); ?>
@@ -144,6 +170,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Crop",
                 markerSize: 0,
+                color: 'green',
                 toolTipContent: "Crop View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['news']['crop'], JSON_NUMERIC_CHECK); ?>
@@ -151,6 +178,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Fertilizer",
                 markerSize: 0,
+                color: 'lightgreen',
                 toolTipContent: "Fertilizer View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['news']['fertilizer'], JSON_NUMERIC_CHECK); ?>
@@ -158,9 +186,18 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Pesticides",
                 markerSize: 0,
+                color: 'blue',
                 toolTipContent: "Pesticides View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['news']['pesticides'], JSON_NUMERIC_CHECK); ?>
+            }, {
+                type: "line",
+                name: "Plant",
+                markerSize: 0,
+                color: 'gray',
+                toolTipContent: "Plant View {y} on {x}",
+                showInLegend: true,
+                dataPoints: <?php echo json_encode($charts['overall']['plant'], JSON_NUMERIC_CHECK); ?>
             }]
         });
         news.render();
@@ -174,10 +211,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
             news.render();
         }
 
-        document1 = new CanvasJS.Chart("document", {
+        blog = new CanvasJS.Chart("blog", {
             animationEnabled: true,
             title: {
-                text: "Agri Arbor Document"
+                text: "Agri Arbor Blog"
             },
             axisX: {
                 title: "Time Pariod"
@@ -194,34 +231,46 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Animal",
                 markerSize: 0,
+                color: 'black',
                 toolTipContent: "Animal View {y} on {x}",
                 showInLegend: true,
-                dataPoints: <?php echo json_encode($charts['document']['animal'], JSON_NUMERIC_CHECK); ?>
+                dataPoints: <?php echo json_encode($charts['blog']['animal'], JSON_NUMERIC_CHECK); ?>
             }, {
                 type: "line",
                 name: "Crop",
                 markerSize: 0,
+                color: 'green',
                 toolTipContent: "Crop View {y} on {x}",
                 showInLegend: true,
-                dataPoints: <?php echo json_encode($charts['document']['crop'], JSON_NUMERIC_CHECK); ?>
+                dataPoints: <?php echo json_encode($charts['blog']['crop'], JSON_NUMERIC_CHECK); ?>
             }, {
                 type: "line",
                 name: "Fertilizer",
                 markerSize: 0,
+                color: 'lightgreen',
                 toolTipContent: "Fertilizer View {y} on {x}",
                 showInLegend: true,
-                dataPoints: <?php echo json_encode($charts['document']['fertilizer'], JSON_NUMERIC_CHECK); ?>
+                dataPoints: <?php echo json_encode($charts['blog']['fertilizer'], JSON_NUMERIC_CHECK); ?>
             }, {
                 type: "line",
                 name: "Pesticides",
                 markerSize: 0,
+                color: 'blue',
                 toolTipContent: "Pesticides View {y} on {x}",
                 showInLegend: true,
-                dataPoints: <?php echo json_encode($charts['document']['pesticides'], JSON_NUMERIC_CHECK); ?>
+                dataPoints: <?php echo json_encode($charts['blog']['pesticides'], JSON_NUMERIC_CHECK); ?>
+            }, {
+                type: "line",
+                name: "Plant",
+                markerSize: 0,
+                color: 'gray',
+                toolTipContent: "Plant View {y} on {x}",
+                showInLegend: true,
+                dataPoints: <?php echo json_encode($charts['overall']['plant'], JSON_NUMERIC_CHECK); ?>
             }]
         });
 
-        document1.render();
+        blog.render();
 
         function toggleDataSeries(e) {
             if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
@@ -229,7 +278,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
             } else {
                 e.dataSeries.visible = true;
             }
-            document1.render();
+            blog.render();
         }
 
         video = new CanvasJS.Chart("video", {
@@ -252,6 +301,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Animal",
                 markerSize: 0,
+                color: 'black',
                 toolTipContent: "Animal View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['video']['animal'], JSON_NUMERIC_CHECK); ?>
@@ -259,6 +309,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Crop",
                 markerSize: 0,
+                color: 'green',
                 toolTipContent: "Crop View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['video']['crop'], JSON_NUMERIC_CHECK); ?>
@@ -266,6 +317,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Fertilizer",
                 markerSize: 0,
+                color: 'lightgreen',
                 toolTipContent: "Fertilizer View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['video']['fertilizer'], JSON_NUMERIC_CHECK); ?>
@@ -273,9 +325,18 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 type: "line",
                 name: "Pesticides",
                 markerSize: 0,
+                color: 'blue',
                 toolTipContent: "Pesticides View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['video']['pesticides'], JSON_NUMERIC_CHECK); ?>
+            }, {
+                type: "line",
+                name: "Plant",
+                markerSize: 0,
+                color: 'gray',
+                toolTipContent: "Plant View {y} on {x}",
+                showInLegend: true,
+                dataPoints: <?php echo json_encode($charts['overall']['plant'], JSON_NUMERIC_CHECK); ?>
             }]
         });
         video.render();
@@ -307,9 +368,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
             },
             data: [{
                 type: "line",
-                name: "Animal",
+                name: "User",
                 markerSize: 0,
-                toolTipContent: "Animal View {y} on {x}",
+                toolTipContent: "Users View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['dashboard']['none'], JSON_NUMERIC_CHECK); ?>
             }]
@@ -342,7 +403,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
     <div id="news" class="charts"></div>
 
-    <div id="document" class="charts"></div>
+    <div id="blog" class="charts"></div>
 
     <div id="video" class="charts"></div>
 </div>

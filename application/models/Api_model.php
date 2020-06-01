@@ -32,9 +32,11 @@ class Api_model extends CI_Model
     function get_dashboard()
     {
         $dashboard = array();
+        $today = date('Y-m-d');
         $config = $this->config->item('image');
         $carousel = $this->db->select('ca.title, ca.link , ca.description, fs.unique_name as image_url, fs.file_name')
             ->join($this->tables['file'] . ' fs', 'fs.id = ca.file_id', 'left')
+            ->where(array('start_date <=' => $today, 'end_date >=' => $today))
             ->limit($this->carousel_limit)
             ->order_by('ca.position', $this->carousel_random)
             ->get($this->tables['carousel'] . ' ca')->result_array();
@@ -42,7 +44,7 @@ class Api_model extends CI_Model
         if (!empty($carousel)) {
             foreach ($carousel as $key => $value) {
                 $carousel[$key]['image_url'] = site_url($config['upload_path']) . $value['image_url'];
-                $carousel[$key]['link'] = !empty($this->carousel_event) ? $value['link'] : '';
+                $carousel[$key]['link'] = !empty($this->carousel_event) ? custom_secure_data($value['link']) : '';
             }
         }
 
@@ -59,6 +61,7 @@ class Api_model extends CI_Model
 
                 $resources[$key]['image_url'] = site_url($config['upload_path']) . $file_2->unique_name;
                 $resources[$key]['link'] = $file->unique_name;
+                $resources[$key]['id'] = custom_secure_data($resources[$key]['id']);
             }
         }
 
@@ -69,7 +72,7 @@ class Api_model extends CI_Model
             ->get($this->tables['document'] . ' dc')->result_array();
 
         $news = array();
-        $read = array();
+        $blogs = array();
         $info = array();
 
         foreach ($documents as $key => $document) {
@@ -82,6 +85,7 @@ class Api_model extends CI_Model
             $document['image_url'] = site_url($config['upload_path']) . $document['image_url'];
 
             $document['title'] = cut_text($document['title'], 30);
+            $document['id'] = custom_secure_data($document['id']);
 
             switch ($document['display_type']) {
                 case 'info':
@@ -92,9 +96,9 @@ class Api_model extends CI_Model
                     $document['description'] = cut_text($document['description']);
                     $news[] = $document;
                     break;
-                case 'document':
+                case 'blog':
                     $document['description'] = cut_text($document['description']);
-                    $read[] = $document;
+                    $blogs[] = $document;
                     break;
             }
         }
@@ -102,7 +106,8 @@ class Api_model extends CI_Model
         $dashboard = array(
             'carousel' => $carousel,
             'info' => array_slice($info, 0, 4),
-            'read' => array_slice($read, 0, 4),
+            'infos' => array_slice($info, 4, 9),
+            'blogs' => array_slice($blogs, 0, 4),
             'news' => array_slice($news, 0, 4),
             'resources' => $resources,
         );
@@ -121,6 +126,9 @@ class Api_model extends CI_Model
     function topic_detail($id)
     {
         $document = array();
+        $id = custom_secure_data($id, false);
+
+
         $document = $this->db->select('dc.id, dc.title, dc.display_type as content_type, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use')
             ->join('classification cl', 'cl.document_id = dc.id', 'left')
             ->where('dc.id', $id)
@@ -129,13 +137,15 @@ class Api_model extends CI_Model
         if (!empty($document)) {
             $document = $document[0];
 
-            $data_analytic = array(
-                'product_type' => $document['cl_type'],
-                'display_type' => $document['content_type'],
-                'created' => date('Y-m-d')
-            );
+            if (!empty($document['cl_type'])) {
+                $data_analytic = array(
+                    'product_type' => $document['cl_type'],
+                    'display_type' => $document['content_type'],
+                    'created' => date('Y-m-d')
+                );
 
-            $this->analytic_manager($data_analytic);
+                $this->analytic_manager($data_analytic);
+            }
 
             $contents = $this->db->select('ct.description, ct.resource_id, ct.topic_id, ct.content_type')
                 ->order_by('position', 'asc')
@@ -158,6 +168,12 @@ class Api_model extends CI_Model
                         case 'topic':
                             $temp['type'] = $content['content_type'];
                             $temp['sub_topics'] = $this->topic_detail($content['topic_id']);
+                            break;
+                        case 'document':
+                            $temp['type'] = $content['content_type'];
+                            $temp['document_id'] = $content['topic_id'];
+                            $temp['title'] = $content['description'];
+                            $temp['display_type'] = 'info';
                             break;
                     }
                     array_push($document['detail'], $temp);
@@ -215,6 +231,7 @@ class Api_model extends CI_Model
             $document['title'] = cut_text($document['title'], 30);
 
             $document['description'] = cut_text($document['description']);
+            $document['id'] = custom_secure_data($document['id']);
             $topics[] = $document;
         }
         return $topics;
@@ -238,6 +255,7 @@ class Api_model extends CI_Model
 
                 $resources[$key]['image_url'] = site_url($config['upload_path']) . $file_2->unique_name;
                 $resources[$key]['link'] = $file->unique_name;
+                $resources[$key]['id'] = custom_secure_data($resources[$key]['id']);
             }
         }
         return $resources;
@@ -355,6 +373,7 @@ class Api_model extends CI_Model
             return 'error';
         }
         $data = convet_secure_input($params, true);
+        $data['created'] = date('y-m-d h:i:sa');
         $this->db->insert($this->tables['email'], $data);
         return $this->db->insert_id() > 0 ? 'success' : 'error';
     }

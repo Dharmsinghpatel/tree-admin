@@ -24,9 +24,6 @@ class Charts extends CI_Controller
 
         $data['charts'] = $this->resource->chart();
 
-        // p($data);
-        // die;
-
         $this->template->set('title', 'Charts');
         $this->template->load('default_layout', 'contents', 'charts', $data);
     }

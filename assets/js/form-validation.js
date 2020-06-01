@@ -36,6 +36,9 @@ $(document).ready(function () {
             display_type: {
                 required: true,
             },
+            product_type: {
+                required: true,
+            },
             icon: {
                 required: function (ele) {
                     const file = $('#icon_id');
@@ -51,6 +54,14 @@ $(document).ready(function () {
         rules: {
             title: {
                 required: true,
+            },
+            start_date: {
+                required: true,
+                date: true
+            },
+            end_date: {
+                required: true,
+                date: true
             },
             image: {
                 required: function (ele) {

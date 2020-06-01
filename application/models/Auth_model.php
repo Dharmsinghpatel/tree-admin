@@ -92,6 +92,7 @@ class Auth_model extends CI_Model
     function get_email()
     {
         $email = $this->db->select('em.id, em.first_name, em.last_name, em.email, em.created')
+            ->order_by('em.id', 'desc')
             ->get($this->tables['email'] . ' em');
         return $email;
     }

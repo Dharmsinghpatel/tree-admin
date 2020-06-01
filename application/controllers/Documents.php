@@ -5,22 +5,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 class Documents extends CI_Controller
 {
 
-    /**
-     * Index Page for this controller.
-     *
-     * Maps to the following URL
-     * 		http://example.com/index.php/welcome
-     *	- or -
-     * 		http://example.com/index.php/welcome/index
-     *	- or -
-     * Since this controller is set as the default controller in
-     * config/routes.php, it's displayed at http://example.com/
-     *
-     * So any other public methods not prefixed with an underscore will
-     * map to /index.php/welcome/<method_name>
-     * @see https://codeigniter.com/user_guide/general/urls.html
-     */
-
     public function __construct()
     {
         Parent::__construct();
@@ -41,19 +25,19 @@ class Documents extends CI_Controller
 
         $data = array(
             'info' => array(
-                'title' => 'Do you know',
+                'title' => 'Info',
                 'add_path' => 'documents/add-documents',
-                'add_title' => 'Add Document',
+                'add_title' => 'Add Info',
                 'datatable_id' => 'documents_list',
                 'data_url' => 'documents/get-documents',
                 'data_url_sort' => 'documents/sort_documents'
             ),
-            'document' => array(
-                'title' => 'Reading Content',
+            'blog' => array(
+                'title' => 'Blog',
                 'add_path' => 'documents/add-documents',
-                'add_title' => 'Add Reading Content',
+                'add_title' => 'Add Blog',
                 'datatable_id' => 'documents_list',
-                'data_url' => 'documents/get-documents/document',
+                'data_url' => 'documents/get-documents/blog',
                 'data_url_sort' => 'documents/sort_documents'
             ),
             'news' => array(
@@ -66,13 +50,12 @@ class Documents extends CI_Controller
             )
         );
 
-        $this->template->set('title', 'Do you know');
+        $this->template->set('title', $data[$arm]['title']);
         $this->template->load('default_layout', 'contents', 'documents/list_documents', $data[$arm]);
     }
 
     public function get_documents($content_type = 'info')
     {
-        // Datatables Variables
         $draw = intval($this->input->get("draw"));
         $documents = $this->document->get_documents($content_type);
         $resources = $documents[0];
@@ -81,14 +64,18 @@ class Documents extends CI_Controller
         $data = array();
         $i = 0;
         $topic_start = 0;
-        foreach ($list as $r) {
+        foreach ($list as $key => $r) {
             $edit_link = site_url('/documents/add-documents/' . $r['id']);
-            $delete_link = site_url('/documents/delete-document/' . $r['id'] . '/' . !!$r['is_topic']);
+            // $delete_link = site_url('/documents/delete-document/' . $r['id'] . '/' . !!$r['is_topic']);
+            $delete_link = !!$r['is_topic'] ?
+                site_url('/documents/delete-document/' . $r['id'] . '/' . !!$r['is_topic']) :
+                site_url('/documents/delete-document/' . $r['id']);
             $topic_start = !$r['is_topic'] ? $topic_start += 1 : $topic_start;
 
             $show_topic = '';
             if (!$r['is_topic']) {
-                $show_topic = ' <a class="mr-10 show-topics" href="javascript:void(0)" data-topic-start="' . $topic_start . '"> <span class="fa fa-plus f-12"></a>';
+                $next_topic = isset($list[$key + 1]) ? $list[$key + 1]['is_topic'] : 0;
+                $show_topic = $next_topic ? ' <a class="mr-10 show-topics" href="javascript:void(0)" data-topic-start="' . $topic_start . '"> <span class="fa fa-plus f-12"></a>' : '';
             }
 
             $sno =  $i += 1;
@@ -136,8 +123,6 @@ class Documents extends CI_Controller
             $data['title'] = 'Edit Documents';
             $data['detail'] = $this->document->get_detail($id);
         }
-
-
 
         $form = $this->input->post();
         $form['file'] = $_FILES;
