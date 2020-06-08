@@ -17,8 +17,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
         <div class="col-4">
             <div class="card text-center bg-dark">
                 <div class="card-header bg-dark">
-                    <span> <img src="https://amar.vote/assets/img/amarVotebd.png" class="w-75" alt="Logo"> </span><br />
-                    <span class="logo_title mt-5"> Login Dashboard </span>
+                    <span>
+                        <img src="<?php echo site_url('assets/images/logo.png') ?>" class="w-25" alt="Logo">
+                        <h4>Agri Arbor</h4>
+                    </span>
                 </div>
                 <div class="card-body">
                     <form method="post">

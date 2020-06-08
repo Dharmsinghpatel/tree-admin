@@ -565,3 +565,12 @@
     width: 100%;
     margin-top:20px
   }
+
+  .card-header {
+    color: #fff;
+    font-family: sans-serif;
+    font-size: 20px;
+    font-weight: 600 !important;
+    margin-top: 10px;
+    border-bottom: 0;
+}

@@ -283,11 +283,31 @@ if (!function_exists(('is_logged_in'))) {
  * cut string
  */
 if (!function_exists(('cut_text'))) {
-    function cut_text($text, $length = 250)
+    function cut_text($text, $length = 50)
     {
         if (strlen($text) > $length) {
-            return substr($text, 0, $length) . '...';
+            // $limit = str_word_count(substr(strip_tags($text), 0, $length)) - 1;
+            // p(substr(strip_tags($text), 0, $length));
+            // d($limit);
+            return trim(limit_words(strip_tags($text), $length));
         }
+        return trim(strip_tags($text));
+    }
+}
+
+/**
+ * words limit
+ */
+if (!function_exists(('limit_words'))) {
+    function limit_words($text, $limit)
+    {
+        $word_arr = explode(" ", $text);
+
+        if (count($word_arr) > $limit) {
+            $words = implode(" ", array_slice($word_arr, 0, $limit)) . ' ...';
+            return $words;
+        }
+
         return $text;
     }
 }
@@ -318,8 +338,6 @@ if (!function_exists(('custom_secure_data'))) {
     {
 
         $string_to_encrypt = "Te@#/?sis@123";
-        // $encrypted_string=openssl_encrypt($string_to_encrypt,"AES-128-ECB",$password);
-        // $decrypted_string=openssl_decrypt($encrypted_string,"AES-128-ECB",$password);
 
         if ($encrypt) {
             return openssl_encrypt($data, "AES-128-ECB", $string_to_encrypt);

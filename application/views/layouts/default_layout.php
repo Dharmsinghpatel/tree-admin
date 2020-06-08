@@ -11,6 +11,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?php echo $title; ?></title>
 
+    <link rel="icon" href="<?php echo base_url(); ?>favicon.ico" type="image/gif">
+
     <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
 
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/bootstrap.min.css">

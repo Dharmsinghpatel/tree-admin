@@ -74,7 +74,7 @@ class Api_model extends CI_Model
         $news = array();
         $blogs = array();
         $info = array();
-
+        $info_count = 0;
         foreach ($documents as $key => $document) {
 
             $content = $this->db->select('ct.description')
@@ -89,7 +89,9 @@ class Api_model extends CI_Model
 
             switch ($document['display_type']) {
                 case 'info':
-                    $document['description'] = cut_text($document['description'], 900);
+                    $info_count += 1;
+                    $limit = $info_count <= 5 ? 250 : 50;
+                    $document['description'] = cut_text($document['description'], $limit);
                     $info[] = $document;
                     break;
                 case 'news':
@@ -105,8 +107,8 @@ class Api_model extends CI_Model
 
         $dashboard = array(
             'carousel' => $carousel,
-            'info' => array_slice($info, 0, 4),
-            'infos' => array_slice($info, 4, 9),
+            'info' => array_slice($info, 0, 5),
+            'infos' => array_slice($info, 5, 4),
             'blogs' => array_slice($blogs, 0, 4),
             'news' => array_slice($news, 0, 4),
             'resources' => $resources,
@@ -129,7 +131,7 @@ class Api_model extends CI_Model
         $id = custom_secure_data($id, false);
 
 
-        $document = $this->db->select('dc.id, dc.title, dc.display_type as content_type, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use')
+        $document = $this->db->select('dc.title, dc.display_type as content_type, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use')
             ->join('classification cl', 'cl.document_id = dc.id', 'left')
             ->where('dc.id', $id)
             ->get($this->tables['document'] . ' dc')->result_array();
@@ -146,6 +148,10 @@ class Api_model extends CI_Model
 
                 $this->analytic_manager($data_analytic);
             }
+
+            $config = $this->config->item('image');
+            $file = $this->database->get_file($document['icon']);
+            $document['icon'] = site_url($config['upload_path']) . "/" . $file->unique_name;
 
             $contents = $this->db->select('ct.description, ct.resource_id, ct.topic_id, ct.content_type')
                 ->order_by('position', 'asc')
@@ -171,7 +177,7 @@ class Api_model extends CI_Model
                             break;
                         case 'document':
                             $temp['type'] = $content['content_type'];
-                            $temp['document_id'] = $content['topic_id'];
+                            $temp['document_id'] = custom_secure_data($content['topic_id']);
                             $temp['title'] = $content['description'];
                             $temp['display_type'] = 'info';
                             break;
