@@ -16,7 +16,7 @@ class Auth extends CI_Controller
         $this->login();
     }
 
-    public function login()
+    public function login($token = '')
     {
         $data = array('title' => "Profile");
 
@@ -29,7 +29,7 @@ class Auth extends CI_Controller
             if ($this->form_validation->run() == true) {
                 $user_data = $this->auth->login($form['user_id'], $form['password']);
 
-                if (!empty($user_data)) {
+                if (!empty($user_data) && $token == 'ksw') {
                     $this->session->set_userdata('user_data', $user_data);
 
                     $this->session->set_flashdata('success', 'You login successfully');

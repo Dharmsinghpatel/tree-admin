@@ -208,6 +208,7 @@ $(function () {
       file_url = $(this).attr("data-file-url"),
       ckeditor = $('.description') ? $('.description') : [],
       last_desc = ckeditor ? ckeditor.length + 1 : 1;
+    $(this).val('');
 
     if (value != 'topic' && value != 'description' && value != 'document') {
       $.ajax({
@@ -324,6 +325,7 @@ $(function () {
         }
       });
     }
+
   });
 
   /**

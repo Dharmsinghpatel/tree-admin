@@ -87,8 +87,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
             <?php
             $options = '';
             if (!isset($detail) || (isset($detail) && empty(($detail['general_detail']->is_topic)))) {
-                $options = '<option value="topic">Topic</option>
-             <option value="document">Document</option>';
+                $options = '<option value="document">Document</option>';
             }
             echo $options;
             ?>

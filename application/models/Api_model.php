@@ -29,7 +29,7 @@ class Api_model extends CI_Model
         }
     }
 
-    function get_dashboard()
+    function get_dashboard($height = 1950, $width = 1250)
     {
         $dashboard = array();
         $today = date('Y-m-d');
@@ -90,16 +90,18 @@ class Api_model extends CI_Model
             switch ($document['display_type']) {
                 case 'info':
                     $info_count += 1;
-                    $limit = $info_count <= 5 ? 250 : 50;
+                    $limit = $info_count <= 5 ? ($width > 557 ? 250 : 50) : ($width > 557 ? 50 : 20);
                     $document['description'] = cut_text($document['description'], $limit);
                     $info[] = $document;
                     break;
                 case 'news':
-                    $document['description'] = cut_text($document['description']);
+                    $limit = $width > 557 ? 50 : 20;
+                    $document['description'] = cut_text($document['description'], $limit);
                     $news[] = $document;
                     break;
                 case 'blog':
-                    $document['description'] = cut_text($document['description']);
+                    $limit = $width > 557 ? 50 : 20;
+                    $document['description'] = cut_text($document['description'], $limit);
                     $blogs[] = $document;
                     break;
             }
@@ -130,11 +132,11 @@ class Api_model extends CI_Model
         $document = array();
         $id = custom_secure_data($id, false);
 
-
         $document = $this->db->select('dc.title, dc.display_type as content_type, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use')
             ->join('classification cl', 'cl.document_id = dc.id', 'left')
             ->where('dc.id', $id)
             ->get($this->tables['document'] . ' dc')->result_array();
+
 
         if (!empty($document)) {
             $document = $document[0];
@@ -158,6 +160,7 @@ class Api_model extends CI_Model
                 ->where('document_id', $id)
                 ->get($this->tables['content'] . ' ct')->result_array();
 
+            // d($contents);
             $document['detail'] = array();
             if (isset($contents) && !empty($contents)) {
                 foreach ($contents as $key => $content) {

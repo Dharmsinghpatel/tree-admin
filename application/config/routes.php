@@ -88,6 +88,7 @@ $route['carousel/delete-carousel/(:num)'] = 'carousel/delete_carousel/$1';
 //auth routes
 $route['profile'] = 'auth/add_profile';
 $route['login'] = 'auth/login';
+$route['login/(:any)'] = 'auth/login/$1';
 $route['email'] = 'auth/list_email';
 $route['auth/get-email'] = 'auth/get_email';
 $route['email/(:num)'] = 'auth/email';

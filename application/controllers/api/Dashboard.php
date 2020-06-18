@@ -23,9 +23,15 @@ class Dashboard extends REST_Controller
      *
      * @return Response
      */
-    function index_get()
+    function index_post()
     {
-        $data = $this->api->get_dashboard();
+        $height = $this->post('height');
+        $width = $this->post('width');
+
+        $data = array();
+        if (!empty($height) && !empty($width)) {
+            $data = $this->api->get_dashboard($height, $width);
+        }
 
         if (!empty($data)) {
             $this->response(array('data' => $data, 'status' => 'success', 'msg' => $this->lang->line('success')), REST_Controller::HTTP_OK);

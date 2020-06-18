@@ -283,7 +283,7 @@ if (!function_exists(('is_logged_in'))) {
  * cut string
  */
 if (!function_exists(('cut_text'))) {
-    function cut_text($text, $length = 50)
+    function cut_text($text, $length = 20)
     {
         if (strlen($text) > $length) {
             // $limit = str_word_count(substr(strip_tags($text), 0, $length)) - 1;
