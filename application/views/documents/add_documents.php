@@ -73,6 +73,25 @@ defined('BASEPATH') or exit('No direct script access allowed');
         </div>
     </div>
 
+    <hr>
+
+    <div class="form-group">
+        <label for="meta_active">Active Metadata</label>
+        <input type="checkbox" id="meta_active" name="meta_active" <?php echo isset($detail) ? ($detail['general_detail']->meta_active ? 'checked' : '') : '' ?>>
+    </div>
+
+    <div class="form-group">
+        <label for="keywords">Keywords</label>
+        <input type="text" class="form-control" id="keywords" name="keywords" value="<?php echo isset($detail) ? $detail['general_detail']->keywords : '' ?>" placeholder="Keywords">
+    </div>
+
+    <div class="form-group">
+        <label for="meta_description">Decription</label>
+        <textarea type="text" class="form-control" id="meta_description" name="meta_description" placeholder="Description"><?php echo isset($detail) ? $detail['general_detail']->meta_description : '' ?></textarea>
+    </div>
+
+    <hr>
+
     <div id="aditional_sort">
         <?php echo isset($detail) ? $detail['resources'] : '' ?>
     </div>

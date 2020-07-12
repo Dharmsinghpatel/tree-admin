@@ -5,8 +5,9 @@ class Documents_model extends CI_Model
     public $tables = array();
     function __construct()
     {
-        $this->tables = array('resource' => 'resources', 'document' => 'documents', 'contents' => 'contents', 'classification' => 'classification');
+        $this->tables = array('resource' => 'resources', 'document' => 'documents', 'contents' => 'contents', 'classification' => 'classification', 'metadata' => 'metadata');
         $this->load->model('database_model', 'database');
+        $this->load->helper('text');
     }
 
     function get_documents($content_type)
@@ -44,11 +45,14 @@ class Documents_model extends CI_Model
     function add_documents($params)
     {
         extract($params);
+
         $url = isset($url) ? $url : null;
         $icon_id = isset($icon_id) ? $icon_id : null;
         $document_id = isset($document_id) ? $document_id : null;
         $exist_topics = isset($exist_topics) ? $exist_topics : array();
         $exist_documents = isset($exist_documents) ? $exist_documents : array();
+
+        $meta_active = isset($meta_active) ? 1 : 0;
 
         if (!isset($title) || empty($title)) {
             return;
@@ -59,8 +63,10 @@ class Documents_model extends CI_Model
             $icon_id = is_numeric($icon_id) ? $icon_id : null;
         }
 
+        $slug = $this->clean_slug($title, $this->tables['document'], $document_id);
         $data = array(
             'title' => $title,
+            'slug' => $slug,
             'display_type' => $display_type,
             'icon' => $icon_id
         );
@@ -70,6 +76,14 @@ class Documents_model extends CI_Model
             'product_name' => $product_name,
             'product_use' => $product_use,
             'document_id' => $document_id
+        );
+
+        $metadata = array(
+            'slug' => $slug,
+            'document_id' => $document_id,
+            'keywords' => $keywords,
+            'description' => $meta_description,
+            'active' => $meta_active
         );
 
         $this->db->trans_start();
@@ -87,6 +101,15 @@ class Documents_model extends CI_Model
                 ->update($this->tables['classification'], $data_class)
                 :
                 $this->db->insert($this->tables['classification'], $data_class);
+
+            $is_metadata = $this->db->where('document_id', $document_id)->from($this->tables['metadata'])->count_all_results();
+
+            $is_metadata == 1 ?
+                $this->db->where('document_id', $document_id)
+                ->update($this->tables['metadata'], $metadata)
+                :
+                $this->db->insert($this->tables['metadata'], $metadata);
+
 
             //delete description and files
             $this->db->where(array('document_id' => $document_id))
@@ -116,8 +139,9 @@ class Documents_model extends CI_Model
             $data['created'] = date('Y-m-d h:i:sa');
 
             $this->db->insert($this->tables['document'], $data);
-            $document_id = $data_class['document_id'] = $this->db->insert_id();
+            $document_id = $data_class['document_id'] = $metadata['document_id'] = $this->db->insert_id();
             $this->db->insert($this->tables['classification'], $data_class);
+            $this->db->insert($this->tables['metadata'], $metadata);
         }
 
         $documents_row = array();
@@ -199,6 +223,24 @@ class Documents_model extends CI_Model
         return TRUE;
     }
 
+    function clean_slug($title = NULL, $table = NULL, $id = NULL)
+    {
+        if (!$title && !$table) return FALSE;
+
+        $simpleText = preg_replace('/[!@#$%^&*()_+-=?><,.{}]/', '', $title);
+        // $slug = url_title(convert_accented_characters($title), 'dash', true);
+        $slug = trim(preg_replace('/[[:space:]]+/', '-', $simpleText));
+
+        $num = $this->db->from($table)->where(array('slug' => $slug))
+            ->where('id !=', $id)->get()->num_rows();
+
+        if ($num == 0) {
+            return $slug;
+        }
+
+        return $this->clean_slug($slug . '-1', $table, $id);
+    }
+
     function delete_documents($id = null, $is_topic)
     {
         $flag = 'error';
@@ -269,8 +311,9 @@ class Documents_model extends CI_Model
     {
         $document = array();
         if (!empty($id)) {
-            $document['general_detail'] = $this->db->select('dc.id, dc.title, dc.display_type, dc.is_topic, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use')
+            $document['general_detail'] = $this->db->select('dc.id, dc.title, dc.display_type, dc.is_topic, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use, mt.keywords, mt.active as meta_active, mt.description as meta_description')
                 ->join($this->tables['classification'] . ' cl', 'cl.document_id = dc.id', 'left')
+                ->join($this->tables['metadata'] . ' mt', 'mt.document_id = dc.id', 'left')
                 ->where('dc.id', $id)
                 ->get($this->tables['document'] . ' dc')->row();
 

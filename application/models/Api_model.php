@@ -12,7 +12,7 @@ class Api_model extends CI_Model
 
     function __construct()
     {
-        $this->tables = array('resource' => 'resources', 'carousel' => 'carousel', 'file' => 'files', 'document' => 'documents', 'content' => 'contents', 'classification' => 'classification', 'analytic' => 'analytic', 'email' => 'email', 'setting' => 'setting');
+        $this->tables = array('resource' => 'resources', 'carousel' => 'carousel', 'file' => 'files', 'document' => 'documents', 'content' => 'contents', 'classification' => 'classification', 'analytic' => 'analytic', 'email' => 'email', 'setting' => 'setting', 'metadata' => 'metadata');
         $this->load->model('database_model', 'database');
         $this->load->model('resources_model', 'resource');
 
@@ -44,7 +44,10 @@ class Api_model extends CI_Model
         if (!empty($carousel)) {
             foreach ($carousel as $key => $value) {
                 $carousel[$key]['image_url'] = site_url($config['upload_path']) . $value['image_url'];
-                $carousel[$key]['link'] = !empty($this->carousel_event) ? custom_secure_data($value['link']) : '';
+                $carousel[$key]['link'] = !empty($this->carousel_event) ?
+                    // custom_secure_data($value['link']) 
+                    trim($value['link'])
+                    : '';
             }
         }
 
@@ -65,7 +68,7 @@ class Api_model extends CI_Model
             }
         }
 
-        $documents = $this->db->select('dc.id, dc.title,dc.display_type, fs.unique_name as image_url, fs.file_name')
+        $documents = $this->db->select('dc.id,dc.slug, dc.title,dc.display_type, fs.unique_name as image_url, fs.file_name')
             ->join($this->tables['file'] . ' fs', 'fs.id = dc.icon', 'left')
             ->order_by('position', $this->dashboard_random)
             ->where('dc.is_topic', null)
@@ -85,7 +88,7 @@ class Api_model extends CI_Model
             $document['image_url'] = site_url($config['upload_path']) . $document['image_url'];
 
             $document['title'] = cut_text($document['title'], 30);
-            $document['id'] = custom_secure_data($document['id']);
+            $document['id'] = trim($document['slug']);
 
             switch ($document['display_type']) {
                 case 'info':
@@ -106,6 +109,17 @@ class Api_model extends CI_Model
                     break;
             }
         }
+        $route = 'videos';
+
+        $meta_data = array(
+            array('name' => 'description', 'content' => ''),
+            array('name' => 'keywords', 'content' => 'agriarbor, ' . $route . ', agri arbor' . $route . ', agriarbor ' . $route . '')
+        );
+
+        $meta_data = array(
+            array('name' => 'description', 'content' => 'Agri Arbor\'s  फसल, पशु, पौधे, खाद, कीटनाशक आदि का बुनियादी ज्ञान , videos, blogs प्रदान करती है।'),
+            array('name' => 'keywords', 'content' => 'agriarbor, home, agri arbor home, agriarbor home')
+        );
 
         $dashboard = array(
             'carousel' => $carousel,
@@ -113,6 +127,7 @@ class Api_model extends CI_Model
             'infos' => array_slice($info, 5, 4),
             'blogs' => array_slice($blogs, 0, 4),
             'news' => array_slice($news, 0, 4),
+            'meta' => $meta_data,
             'resources' => $resources,
         );
 
@@ -130,16 +145,19 @@ class Api_model extends CI_Model
     function topic_detail($id)
     {
         $document = array();
-        $id = custom_secure_data($id, false);
+        // $id = custom_secure_data($id, false);
+        $id = trim($id);
 
         $document = $this->db->select('dc.title, dc.display_type as content_type, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use')
             ->join('classification cl', 'cl.document_id = dc.id', 'left')
-            ->where('dc.id', $id)
+            ->where('dc.slug', $id)
             ->get($this->tables['document'] . ' dc')->result_array();
 
-
+        // $meta_keywords = '';
+        // $meta_description = '';
         if (!empty($document)) {
             $document = $document[0];
+            // $meta_keywords = implode(', ', array_values($document));
 
             if (!empty($document['cl_type'])) {
                 $data_analytic = array(
@@ -155,9 +173,10 @@ class Api_model extends CI_Model
             $file = $this->database->get_file($document['icon']);
             $document['icon'] = site_url($config['upload_path']) . "/" . $file->unique_name;
 
-            $contents = $this->db->select('ct.description, ct.resource_id, ct.topic_id, ct.content_type')
-                ->order_by('position', 'asc')
-                ->where('document_id', $id)
+            $contents = $this->db->select('ct.description, ct.resource_id, ct.topic_id, ct.content_type,dc.slug')
+                ->order_by('ct.position', 'asc')
+                ->join($this->tables['document'] . ' dc', 'dc.id = ct.document_id', 'left')
+                ->where('dc.slug', $id)
                 ->get($this->tables['content'] . ' ct')->result_array();
 
             // d($contents);
@@ -169,18 +188,20 @@ class Api_model extends CI_Model
                         case 'description':
                             $temp['type'] = $content['content_type'];
                             $temp['description'] = $content['description'];
+                            // $meta_description = ($meta_description == '') ? cut_text($content['description'], 81) : $meta_description;
                             break;
                         case 'file':
                             $resource_detail = $this->resource->get_resource($content['resource_id']);
                             $temp = $this->resource_manager($resource_detail);
                             break;
-                        case 'topic':
-                            $temp['type'] = $content['content_type'];
-                            $temp['sub_topics'] = $this->topic_detail($content['topic_id']);
-                            break;
+                            // case 'topic':
+                            //     $temp['type'] = $content['content_type'];
+                            //     $temp['sub_topics'] = $this->topic_detail($content['topic_id']);
+                            //     break;
                         case 'document':
                             $temp['type'] = $content['content_type'];
-                            $temp['document_id'] = custom_secure_data($content['topic_id']);
+                            // $temp['document_id'] = custom_secure_data($content['topic_id']);
+                            $temp['document_id'] = $content['slug'];
                             $temp['title'] = $content['description'];
                             $temp['display_type'] = 'info';
                             break;
@@ -190,6 +211,18 @@ class Api_model extends CI_Model
             }
         }
 
+
+        $metadata_row = $this->db->select('mt.description, mt.keywords')
+            ->where(array('mt.slug' => $id, 'mt.active >' => '0'))
+            ->get($this->tables['metadata'] . ' mt')->row();
+
+
+        $meta_data = array(
+            array('name' => 'keywords', 'content' => isset($metadata_row->keywords) ? $metadata_row->keywords : ''),
+            array('name' => 'description', 'content' => isset($metadata_row->description) ? $metadata_row->description : '')
+        );
+
+        $document['meta'] = $meta_data;
         return $document;
     }
 
@@ -219,7 +252,7 @@ class Api_model extends CI_Model
 
     public function get_topics($topics_type = "info")
     {
-        $documents = $this->db->select('dc.id, dc.display_type, dc.title, fs.unique_name as image_url, fs.file_name')
+        $documents = $this->db->select('dc.id, dc.display_type, dc.title, fs.unique_name as image_url, fs.file_name, dc.slug')
             ->join($this->tables['file'] . ' fs', 'fs.id = dc.icon', 'left')
             ->order_by('position', 'asc')
             ->where(array('dc.is_topic' => null, 'dc.display_type' => $topics_type))
@@ -240,15 +273,21 @@ class Api_model extends CI_Model
             $document['title'] = cut_text($document['title'], 30);
 
             $document['description'] = cut_text($document['description']);
-            $document['id'] = custom_secure_data($document['id']);
+            // $document['id'] = custom_secure_data($document['id']);
+            $document['id'] = trim($document['slug']);
             $topics[] = $document;
         }
-        return $topics;
+
+        $meta_data = array(
+            array('name' => 'description', 'content' => 'Agri Arbor\'s ' . $topics_type . ' फसल, पशु, पौधे, खाद , कीटनाशक आदि का बुनियादी ज्ञान प्रदान करती है।'),
+            array('name' => 'keywords', 'content' => 'agriarbor, ' . $topics_type . ', agri arbor ' . $topics_type . ', agriarbor ' . $topics_type . '')
+        );
+
+        return array('topics' => $topics, 'meta' => $meta_data);
     }
 
     public function get_videoes($id = null)
     {
-
         $where = !empty($id) ? array('rs.resource_type' => 'video', 'rs.id' => $id) : array('rs.resource_type' => 'video');
 
         $resources = $this->db->select('rs.id, rs.title, rs.file_id as link, rs.file_id_2 as image_url, rs.description')
@@ -267,7 +306,15 @@ class Api_model extends CI_Model
                 $resources[$key]['id'] = custom_secure_data($resources[$key]['id']);
             }
         }
-        return $resources;
+
+        $route = 'videos';
+
+        $meta_data = array(
+            array('name' => 'description', 'content' => 'Agri Arbor\'s videos फसल, पशु, पौधे, खाद, कीटनाशक आदि का बुनियादी ज्ञान प्रदान करती है।'),
+            array('name' => 'keywords', 'content' => 'agriarbor, ' . $route . ', agri arbor ' . $route . ', agriarbor ' . $route . '')
+        );
+
+        return array('videos' => $resources, 'meta' => $meta_data);;
     }
 
     public function search_product($params = array())
