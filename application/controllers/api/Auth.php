@@ -24,8 +24,8 @@ class Auth extends REST_Controller
         if ($this->form_validation->run() == FALSE) {
             $this->response(array('status' => 'error', 'msg' => $this->form_validation->error_array()), REST_Controller::HTTP_OK);
         } else {
-            $staus = $this->api->message_save($data);
-            $this->response(array('status' => $staus, 'msg' => $this->lang->line($staus ? 'success' : 'error')), REST_Controller::HTTP_OK);
+            $status = $this->api->message_save($data);
+            $this->response(array('status' => $status, 'msg' => $this->lang->line($status ? 'success' : 'error')), REST_Controller::HTTP_OK);
         }
     }
 }

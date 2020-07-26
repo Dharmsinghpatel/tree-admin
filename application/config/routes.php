@@ -65,6 +65,7 @@ $route['documents/add-documents'] = 'documents/add_documents';
 $route['documents/add-documents/(:any)'] = 'documents/add_documents/$1';
 $route['documents/delete-document/(:num)'] = 'documents/delete_document/$1';
 $route['documents/delete-document/(:num)/(:any)'] = 'documents/delete_document/$1/$2';
+$route['documents/active-document/(:num)'] = 'documents/active_document/$1';
 
 //resource routes
 $route['resources/get-resources'] = 'resources/get_resources';
@@ -74,6 +75,7 @@ $route['resources/add-resource/(:any)'] = 'resources/add_resource/$1';
 $route['resources/list-resources'] = 'resources/list_resources';
 $route['resources/delete-resource/(:any)'] = 'resources/delete_resource/$1';
 $route['resources/get-resource-content'] = 'resources/get_resource_content';
+$route['resources/show-resource/(:num)'] = 'resources/show_resource/$1';
 
 //charts routes
 $route['charts'] = 'charts';

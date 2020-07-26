@@ -24,6 +24,12 @@ $config = array(
             'errors' =>  'You must provide a %s.',
         ),
         array(
+            'field' => 'slug',
+            'label' => 'Slug',
+            'rules' => array('trim', 'required'),
+            'errors' =>  'You must provide a %s.',
+        ),
+        array(
             'field' => 'display_type',
             'label' => 'Dispaly Type',
             'rules' => array('trim', 'required'),
@@ -156,9 +162,9 @@ $config = array(
             'errors' =>  'You must check %s.',
         ),
         array(
-            'field' => 'email',
-            'label' => 'Email',
-            'rules' => array('trim', 'max_length[99]', 'valid_email[email]'),
+            'field' => 'contact',
+            'label' => 'Contact',
+            'rules' => array('trim', 'max_length[99]'),
             'errors' =>  'You must check %s.',
         ),
         array(

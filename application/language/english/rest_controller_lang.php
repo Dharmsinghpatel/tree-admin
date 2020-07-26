@@ -20,6 +20,6 @@ $lang['text_rest_unsupported'] = 'Unsupported protocol';
 /**
  * custom API
  */
-$lang['success'] = 'Success.';
+$lang['success'] = 'We are happy to have your comment. हमें आपकी टिप्पणी पर खुशी हुई।';
 $lang['error'] = 'Network Error.';
 $lang['invalid_search'] = 'You provide invalid data!';

@@ -26,6 +26,9 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     <option value="crop">Crop</option>
                     <option value="fertilizer">Fertilizer</option>
                     <option value="pesticides">Pesticides</option>
+                    <option value="flower">Flower</option>
+                    <option value="tree">Tree</option>
+                    <option value="insects">Insects</option>
                 </select>
                 <small class="text-danger"><?php echo form_error('product_type'); ?></small>
             </div>

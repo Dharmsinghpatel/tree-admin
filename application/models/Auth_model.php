@@ -5,7 +5,7 @@ class Auth_model extends CI_Model
     public $tables = array();
     function __construct()
     {
-        $this->tables = array('resource' => 'resources', 'document' => 'documents', 'contents' => 'contents', 'classification' => 'classification', 'user' => 'user', 'files' => 'files', 'email' => 'email');
+        $this->tables = array('resource' => 'resources', 'document' => 'documents', 'contents' => 'contents', 'classification' => 'classification', 'user' => 'user', 'files' => 'files', 'chat' => 'chat');
         $this->load->model('database_model', 'database');
     }
 
@@ -91,23 +91,23 @@ class Auth_model extends CI_Model
 
     function get_email()
     {
-        $email = $this->db->select('em.id, em.first_name, em.last_name, em.email, em.created')
-            ->order_by('em.id', 'desc')
-            ->get($this->tables['email'] . ' em');
+        $email = $this->db->select('cht.id, cht.first_name, cht.last_name,cht.is_read, cht.contact, cht.created')
+            ->order_by('cht.id', 'desc')
+            ->get($this->tables['chat'] . ' cht');
         return $email;
     }
 
     function show_email($id)
     {
-        $email = $this->db->select('em.id, em.first_name, em.last_name, em.email, em.comment')
+        $email = $this->db->select('cht.id, cht.first_name, cht.last_name, cht.contact, cht.comment')
             ->where('id', $id)
-            ->get($this->tables['email'] . ' em')
+            ->get($this->tables['chat'] . ' cht')
             ->row();
         $html = '';
 
         if (!empty($email)) {
             $this->db->where('id', $id)
-                ->update($this->tables['email'], array('is_read' => 1));
+                ->update($this->tables['chat'], array('is_read' => 1));
 
             $html = render_email_modal($email);
         }
@@ -117,7 +117,7 @@ class Auth_model extends CI_Model
     function delete_email($id)
     {
         $rs = $this->db->where('id', $id)
-            ->delete($this->tables['email']);
+            ->delete($this->tables['chat']);
 
         return $rs > 0 ? 'success' : 'error';
     }

@@ -66,35 +66,38 @@ class Documents extends CI_Controller
         $topic_start = 0;
         foreach ($list as $key => $r) {
             $edit_link = site_url('/documents/add-documents/' . $r['id']);
-            // $delete_link = site_url('/documents/delete-document/' . $r['id'] . '/' . !!$r['is_topic']);
-            $delete_link = !!$r['is_topic'] ?
-                site_url('/documents/delete-document/' . $r['id'] . '/' . !!$r['is_topic']) :
-                site_url('/documents/delete-document/' . $r['id']);
-            $topic_start = !$r['is_topic'] ? $topic_start += 1 : $topic_start;
+            $delete_link = site_url('/documents/delete-document/' . $r['id']);
+            $active_toggle = site_url('/documents/active-document/' . $r['id']);
+            $active_status = empty($r['is_active']) ? 'Idle' : 'Active';
+            // $delete_link = !!$r['is_topic'] ?
+            //     site_url('/documents/delete-document/' . $r['id'] . '/' . !!$r['is_topic']) :
+            //     site_url('/documents/delete-document/' . $r['id']);
+            // $topic_start = !$r['is_topic'] ? $topic_start += 1 : $topic_start;
 
-            $show_topic = '';
-            if (!$r['is_topic']) {
-                $next_topic = isset($list[$key + 1]) ? $list[$key + 1]['is_topic'] : 0;
-                $show_topic = $next_topic ? ' <a class="mr-10 show-topics" href="javascript:void(0)" data-topic-start="' . $topic_start . '"> <span class="fa fa-plus f-12"></a>' : '';
-            }
+            // $show_topic = '';
+            // if (!$r['is_topic']) {
+            //     $next_topic = isset($list[$key + 1]) ? $list[$key + 1]['is_topic'] : 0;
+            //     $show_topic = $next_topic ? ' <a class="mr-10 show-topics" href="javascript:void(0)" data-topic-start="' . $topic_start . '"> <span class="fa fa-plus f-12"></a>' : '';
+            // }
+            // p($r);
 
             $sno =  $i += 1;
             $data[] = array(
                 "DT_RowId" => $r['is_topic'] ? '' : $r['id'],
-                "DT_RowClass" => $r['is_topic'] ? 'd-none topic topic' . $topic_start . '' : 'show',
+                // "DT_RowClass" => $r['is_topic'] ? 'd-none topic topic' . $topic_start . '' : 'show',
                 $sno,
                 '
                 <div class="d-flex justify-content-between">
                     <div>
                         ' . $r['title'] . '
                     </div>
-                    <div>
-                        ' . $show_topic . '
-                    </div>
                 </div>',
                 $r['created'],
                 $r['updated'],
-                '<a class="mr-10" href="' . $edit_link . '">
+                '<a class="mr-10" href="javascript:void(0)">
+                    <button class="btn btn-outline-primary active" data-active-url="' . $active_toggle . '" >' . $active_status . '</button>
+                </a>
+                <a class="mr-10" href="' . $edit_link . '">
                   <button class="btn btn-outline-primary ">Edit</button>
                 </a> 
                 <a class="mr-10" href="javascript:void(0)">
@@ -168,6 +171,15 @@ class Documents extends CI_Controller
             $status = $this->document->delete_documents($id, $is_topic);
         }
         echo json_encode(array('status' => $status));
+    }
+
+    public function active_document($id)
+    {
+        $res = array('status' => 'error');
+        if (!empty($id)) {
+            $res = $this->document->active_documents($id);
+        }
+        echo json_encode($res);
     }
 }
 ?>

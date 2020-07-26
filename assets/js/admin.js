@@ -406,3 +406,22 @@ $(document).on('click', '.link', function (e) {
   window.open(url);
 
 });
+
+/**
+ * 
+ * Active document
+ */
+$(document).on('click', '.active', function (e) {
+  console.log('active');
+  let url = $(this).attr("data-active-url");
+  $.ajax({
+    url,
+    dataType: 'json',
+    method: 'POST',
+    success: (res) => {
+      if (res.status == 'success') {
+        $(this).html(parseInt(res.is_active) > 0 ? 'Active' : 'Idle')
+      }
+    }
+  });
+});

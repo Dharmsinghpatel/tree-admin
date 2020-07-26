@@ -111,11 +111,12 @@ class Auth extends CI_Controller
             $show_link = site_url('/show-email/' . $r['id']);
             $delete_link = site_url('/delete-email/' . $r['id']);
             $data[] = array(
+                "DT_RowClass" => !$r['is_read'] ? 'unread-chat' : '',
                 "DT_RowId" => $r['id'],
                 $i,
                 $r['first_name'],
                 $r['last_name'],
-                $r['email'],
+                $r['contact'],
                 $r['created'],
                 '<a class="mr-10" href="javascript:void(0)">
                     <button class="btn btn-outline-primary show" data-show-url="' . $show_link . '"><span class="fa fa-eye"></span></button>

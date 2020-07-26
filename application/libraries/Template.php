@@ -8,7 +8,7 @@ class Template
     public $tables = array();
     public function __construct()
     {
-        $this->tables = array('email' => 'email', 'carousel' => 'carousel');
+        $this->tables = array('chat' => 'chat', 'carousel' => 'carousel');
         $this->CI = &get_instance();
     }
 
@@ -29,7 +29,7 @@ class Template
         $this->CI->load->database();
 
         $unread_msg = $this->CI->db->where(['is_read' => null])
-            ->from($this->tables['email'])
+            ->from($this->tables['chat'])
             ->count_all_results();
         $today = date('Y-m-d');
         $notification = $this->CI->db->where('start_date > "' . $today . '" OR end_date < "' . $today . '"')

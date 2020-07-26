@@ -12,7 +12,7 @@ class Api_model extends CI_Model
 
     function __construct()
     {
-        $this->tables = array('resource' => 'resources', 'carousel' => 'carousel', 'file' => 'files', 'document' => 'documents', 'content' => 'contents', 'classification' => 'classification', 'analytic' => 'analytic', 'email' => 'email', 'setting' => 'setting', 'metadata' => 'metadata');
+        $this->tables = array('resource' => 'resources', 'carousel' => 'carousel', 'file' => 'files', 'document' => 'documents', 'content' => 'contents', 'classification' => 'classification', 'analytic' => 'analytic', 'chat' => 'chat', 'setting' => 'setting', 'metadata' => 'metadata');
         $this->load->model('database_model', 'database');
         $this->load->model('resources_model', 'resource');
 
@@ -35,27 +35,27 @@ class Api_model extends CI_Model
         $today = date('Y-m-d');
         $config = $this->config->item('image');
         $carousel = $this->db->select('ca.title, ca.link , ca.description, fs.unique_name as image_url, fs.file_name')
-            ->join($this->tables['file'] . ' fs', 'fs.id = ca.file_id', 'left')
-            ->where(array('start_date <=' => $today, 'end_date >=' => $today))
-            ->limit($this->carousel_limit)
-            ->order_by('ca.position', $this->carousel_random)
-            ->get($this->tables['carousel'] . ' ca')->result_array();
+        ->join($this->tables['file'] . ' fs', 'fs.id = ca.file_id', 'left')
+        ->where(array('start_date <=' => $today, 'end_date >=' => $today))
+        ->limit($this->carousel_limit)
+        ->order_by('ca.position', $this->carousel_random)
+        ->get($this->tables['carousel'] . ' ca')->result_array();
 
         if (!empty($carousel)) {
             foreach ($carousel as $key => $value) {
                 $carousel[$key]['image_url'] = site_url($config['upload_path']) . $value['image_url'];
                 $carousel[$key]['link'] = !empty($this->carousel_event) ?
                     // custom_secure_data($value['link']) 
-                    trim($value['link'])
-                    : '';
+                trim($value['link'])
+                : '';
             }
         }
 
         $resources = $this->db->select('rs.id, rs.title, rs.file_id as link, rs.file_id_2 as image_url, rs.description')
-            ->order_by('position', $this->dashboard_random)
-            ->where('resource_type', 'video')
-            ->limit(4)
-            ->get($this->tables['resource'] . ' rs')->result_array();
+        ->order_by('position', $this->dashboard_random)
+        ->where('resource_type', 'video')
+        ->limit(4)
+        ->get($this->tables['resource'] . ' rs')->result_array();
 
         if (!empty($resources)) {
             foreach ($resources as $key => $resource) {
@@ -68,11 +68,11 @@ class Api_model extends CI_Model
             }
         }
 
-        $documents = $this->db->select('dc.id,dc.slug, dc.title,dc.display_type, fs.unique_name as image_url, fs.file_name')
-            ->join($this->tables['file'] . ' fs', 'fs.id = dc.icon', 'left')
-            ->order_by('position', $this->dashboard_random)
-            ->where('dc.is_topic', null)
-            ->get($this->tables['document'] . ' dc')->result_array();
+        $documents = $this->db->select('dc.id,dc.slug, dc.title,dc.display_type, fs.unique_name as image_url,publish_time, fs.file_name')
+        ->join($this->tables['file'] . ' fs', 'fs.id = dc.icon', 'left')
+        ->order_by('position', $this->dashboard_random)
+        ->where('dc.is_active>"0"')
+        ->get($this->tables['document'] . ' dc')->result_array();
 
         $news = array();
         $blogs = array();
@@ -81,32 +81,34 @@ class Api_model extends CI_Model
         foreach ($documents as $key => $document) {
 
             $content = $this->db->select('ct.description')
-                ->where(array('ct.content_type' => 'description', 'ct.document_id' => $document['id']))
-                ->get($this->tables['content'] . ' ct')->result_array();
+            ->where(array('ct.content_type' => 'description', 'ct.document_id' => $document['id']))
+            ->get($this->tables['content'] . ' ct')->result_array();
 
             $document['description'] = !empty($content) ? $content[0]['description'] : '';
-            $document['image_url'] = site_url($config['upload_path']) . $document['image_url'];
+            $document['image_url'] = $document['image_url']?site_url($config['upload_path']) . $document['image_url']:$document['image_url'];
 
-            $document['title'] = cut_text($document['title'], 30);
+            $document['title'] = cut_text($document['title'], 10);
+            $document['publish_time'] = $document['publish_time'] && $document['publish_time']!= '0000-00-00'?$document['publish_time']:null;
+
             $document['id'] = trim($document['slug']);
 
             switch ($document['display_type']) {
                 case 'info':
-                    $info_count += 1;
-                    $limit = $info_count <= 5 ? ($width > 557 ? 250 : 50) : ($width > 557 ? 50 : 20);
-                    $document['description'] = cut_text($document['description'], $limit);
-                    $info[] = $document;
-                    break;
+                $info_count += 1;
+                $limit = $info_count <= 5 ? ($width > 557 ? 250 : 20) : ($width > 557 ? 20 : 20);
+                $document['description'] = cut_text($document['description'], $limit);
+                $info[] = $document;
+                break;
                 case 'news':
-                    $limit = $width > 557 ? 50 : 20;
-                    $document['description'] = cut_text($document['description'], $limit);
-                    $news[] = $document;
-                    break;
+                $limit = $document['image_url']?20:50 ;
+                $document['description'] = cut_text($document['description'], $limit);
+                $news[] = $document;
+                break;
                 case 'blog':
-                    $limit = $width > 557 ? 50 : 20;
-                    $document['description'] = cut_text($document['description'], $limit);
-                    $blogs[] = $document;
-                    break;
+                $limit = $width > 557 ? 20 : 20;
+                $document['description'] = cut_text($document['description'], $limit);
+                $blogs[] = $document;
+                break;
             }
         }
         $route = 'videos';
@@ -148,10 +150,10 @@ class Api_model extends CI_Model
         // $id = custom_secure_data($id, false);
         $id = trim($id);
 
-        $document = $this->db->select('dc.title, dc.display_type as content_type, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use')
-            ->join('classification cl', 'cl.document_id = dc.id', 'left')
-            ->where('dc.slug', $id)
-            ->get($this->tables['document'] . ' dc')->result_array();
+        $document = $this->db->select('dc.title, dc.display_type as content_type,dc.publish_time, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use')
+        ->join('classification cl', 'cl.document_id = dc.id', 'left')
+        ->where(array('dc.slug'=> $id,'dc.is_active>'=>0))
+        ->get($this->tables['document'] . ' dc')->result_array();
 
         // $meta_keywords = '';
         // $meta_description = '';
@@ -169,15 +171,21 @@ class Api_model extends CI_Model
                 $this->analytic_manager($data_analytic);
             }
 
-            $config = $this->config->item('image');
-            $file = $this->database->get_file($document['icon']);
-            $document['icon'] = site_url($config['upload_path']) . "/" . $file->unique_name;
+            if(!empty($document['icon'])){
+                $config = $this->config->item('image');
+                $file = $this->database->get_file($document['icon']);
+                $document['icon'] = site_url($config['upload_path']) . "/" . $file->unique_name;
+            }
+
+
+            $document['publish_time'] = $document['publish_time'] && $document['publish_time']!= '0000-00-00'?$document['publish_time']:null;
+            $document['title'] = cut_text($document['title'], 30);
 
             $contents = $this->db->select('ct.description, ct.resource_id, ct.topic_id, ct.content_type,dc.slug')
-                ->order_by('ct.position', 'asc')
-                ->join($this->tables['document'] . ' dc', 'dc.id = ct.document_id', 'left')
-                ->where('dc.slug', $id)
-                ->get($this->tables['content'] . ' ct')->result_array();
+            ->order_by('ct.position', 'asc')
+            ->join($this->tables['document'] . ' dc', 'dc.id = ct.document_id', 'left')
+            ->where('dc.slug', $id)
+            ->get($this->tables['content'] . ' ct')->result_array();
 
             // d($contents);
             $document['detail'] = array();
@@ -186,25 +194,25 @@ class Api_model extends CI_Model
                     $temp = array();
                     switch ($content['content_type']) {
                         case 'description':
-                            $temp['type'] = $content['content_type'];
-                            $temp['description'] = $content['description'];
+                        $temp['type'] = $content['content_type'];
+                        $temp['description'] = $content['description'];
                             // $meta_description = ($meta_description == '') ? cut_text($content['description'], 81) : $meta_description;
-                            break;
+                        break;
                         case 'file':
-                            $resource_detail = $this->resource->get_resource($content['resource_id']);
-                            $temp = $this->resource_manager($resource_detail);
-                            break;
+                        $resource_detail = $this->resource->get_resource($content['resource_id']);
+                        $temp = $this->resource_manager($resource_detail);
+                        break;
                             // case 'topic':
                             //     $temp['type'] = $content['content_type'];
                             //     $temp['sub_topics'] = $this->topic_detail($content['topic_id']);
                             //     break;
                         case 'document':
-                            $temp['type'] = $content['content_type'];
+                        $temp['type'] = $content['content_type'];
                             // $temp['document_id'] = custom_secure_data($content['topic_id']);
-                            $temp['document_id'] = $content['slug'];
-                            $temp['title'] = $content['description'];
-                            $temp['display_type'] = 'info';
-                            break;
+                        $temp['document_id'] = $content['slug'];
+                        $temp['title'] = $content['description'];
+                        $temp['display_type'] = 'info';
+                        break;
                     }
                     array_push($document['detail'], $temp);
                 }
@@ -213,8 +221,8 @@ class Api_model extends CI_Model
 
 
         $metadata_row = $this->db->select('mt.description, mt.keywords')
-            ->where(array('mt.slug' => $id, 'mt.active >' => '0'))
-            ->get($this->tables['metadata'] . ' mt')->row();
+        ->where(array('mt.slug' => $id))
+        ->get($this->tables['metadata'] . ' mt')->row();
 
 
         $meta_data = array(
@@ -236,27 +244,28 @@ class Api_model extends CI_Model
         $file = $this->database->get_file($resource->file_id);
         switch ($resource->resource_type) {
             case 'image':
-                $file_detail['image_url'] = site_url($config['upload_path']) . "/" . $file->unique_name;
-                break;
+            $file_detail['image_url'] = site_url($config['upload_path']) . "/" . $file->unique_name;
+            break;
             case 'video':
-                $file_detail['video_url'] =  $file->unique_name;
-                $file_2 = $this->database->get_file($resource->file_id_2);
-                $file_detail['image_url'] = site_url($config['upload_path']) . "/" . $file_2->unique_name;
-                break;
+            $file_detail['video_url'] =  $file->unique_name;
+            $file_2 = $this->database->get_file($resource->file_id_2);
+            $file_detail['image_url'] = site_url($config['upload_path']) . "/" . $file_2->unique_name;
+            break;
             case 'site':
-                $file_detail['image_url'] = $file->unique_name;
-                break;
+            $file_detail['image_url'] = $file->unique_name;
+            break;
         }
         return $file_detail;
     }
 
     public function get_topics($topics_type = "info")
     {
-        $documents = $this->db->select('dc.id, dc.display_type, dc.title, fs.unique_name as image_url, fs.file_name, dc.slug')
-            ->join($this->tables['file'] . ' fs', 'fs.id = dc.icon', 'left')
-            ->order_by('position', 'asc')
-            ->where(array('dc.is_topic' => null, 'dc.display_type' => $topics_type))
-            ->get($this->tables['document'] . ' dc')->result_array();
+        $documents = $this->db->select('dc.id, dc.display_type, dc.title,
+            publish_time, fs.unique_name as image_url, fs.file_name, dc.slug')
+        ->join($this->tables['file'] . ' fs', 'fs.id = dc.icon', 'left')
+        ->order_by('position', 'asc')
+        ->where(array('dc.is_topic' => null, 'dc.display_type' => $topics_type,'dc.is_active>'=>0))
+        ->get($this->tables['document'] . ' dc')->result_array();
 
         $topics = array();
         $config = $this->config->item('image');
@@ -264,16 +273,18 @@ class Api_model extends CI_Model
         foreach ($documents as $key => $document) {
 
             $content = $this->db->select('ct.description')
-                ->where(array('ct.content_type' => 'description', 'ct.document_id' => $document['id']))
-                ->get($this->tables['content'] . ' ct')->result_array();
+            ->where(array('ct.content_type' => 'description', 'ct.document_id' => $document['id']))
+            ->get($this->tables['content'] . ' ct')->result_array();
 
             $document['description'] = !empty($content) ? $content[0]['description'] : '';
-            $document['image_url'] = site_url($config['upload_path']) . $document['image_url'];
+            $document['image_url'] = !empty($document['image_url'])?site_url($config['upload_path']) . $document['image_url']:'';
 
+            $document['publish_time'] = $document['publish_time'] && $document['publish_time']!= '0000-00-00'?$document['publish_time']:null;
             $document['title'] = cut_text($document['title'], 30);
 
-            $document['description'] = cut_text($document['description']);
-            // $document['id'] = custom_secure_data($document['id']);
+            $document['description'] = cut_text($document['description'],!$document['image_url']?50:20);
+
+
             $document['id'] = trim($document['slug']);
             $topics[] = $document;
         }
@@ -291,9 +302,9 @@ class Api_model extends CI_Model
         $where = !empty($id) ? array('rs.resource_type' => 'video', 'rs.id' => $id) : array('rs.resource_type' => 'video');
 
         $resources = $this->db->select('rs.id, rs.title, rs.file_id as link, rs.file_id_2 as image_url, rs.description')
-            ->order_by('position', 'asc')
-            ->where($where)
-            ->get($this->tables['resource'] . ' rs')->result_array();
+        ->order_by('position', 'asc')
+        ->where($where)
+        ->get($this->tables['resource'] . ' rs')->result_array();
         $config = $this->config->item('image');
 
         if (!empty($resources)) {
@@ -321,17 +332,17 @@ class Api_model extends CI_Model
     {
         extract($params);
         $where = $product_type == 'all' ?
-            array('dc.is_topic' => null, 'dc.display_type' => $display_type) :
-            array('dc.is_topic' => null, 'dc.display_type' => $display_type, 'cl.product_type' => $product_type);
+        array('dc.is_topic' => null, 'dc.display_type' => $display_type) :
+        array('dc.is_topic' => null, 'dc.display_type' => $display_type, 'cl.product_type' => $product_type);
         $documents = $this->db->select('dc.id, dc.display_type, dc.title, fs.unique_name as image_url, fs.file_name')
-            ->join($this->tables['classification'] . ' cl', 'cl.document_id = dc.id', 'left')
-            ->join($this->tables['file'] . ' fs', 'fs.id = dc.icon', 'left')
-            ->order_by('dc.position', 'asc')
-            ->where($where)
-            ->group_start()
-            ->or_like(array('dc.title' => $product_name, 'cl.product_name' => $product_name, 'cl.product_use' => $product_name))
-            ->group_end()
-            ->get($this->tables['document'] . ' dc')->result_array();
+        ->join($this->tables['classification'] . ' cl', 'cl.document_id = dc.id', 'left')
+        ->join($this->tables['file'] . ' fs', 'fs.id = dc.icon', 'left')
+        ->order_by('dc.position', 'asc')
+        ->where($where)
+        ->group_start()
+        ->or_like(array('dc.title' => $product_name, 'cl.product_name' => $product_name, 'cl.product_use' => $product_name))
+        ->group_end()
+        ->get($this->tables['document'] . ' dc')->result_array();
 
 
         $topics = array();
@@ -340,8 +351,8 @@ class Api_model extends CI_Model
         foreach ($documents as $key => $document) {
 
             $content = $this->db->select('ct.description')
-                ->where(array('ct.content_type' => 'description', 'ct.document_id' => $document['id']))
-                ->get($this->tables['content'] . ' ct')->result_array();
+            ->where(array('ct.content_type' => 'description', 'ct.document_id' => $document['id']))
+            ->get($this->tables['content'] . ' ct')->result_array();
 
             $document['description'] = !empty($content) ? $content[0]['description'] : '';
             $document['image_url'] = site_url($config['upload_path']) . $document['image_url'];
@@ -359,17 +370,17 @@ class Api_model extends CI_Model
         extract($params);
         //work remain add classification
         $where = $product_type == 'all' ?
-            array('rs.resource_type' => 'video') :
-            array('rs.resource_type' => 'video', 'cl.product_type' => $product_type);
+        array('rs.resource_type' => 'video') :
+        array('rs.resource_type' => 'video', 'cl.product_type' => $product_type);
 
         $resources = $this->db->select('rs.id, rs.title, rs.file_id as link, rs.file_id_2 as image_url, rs.description')
-            ->join($this->tables['classification'] . ' cl', 'cl.resource_id = rs.id', 'left')
-            ->order_by('rs.position', 'asc')
-            ->where($where)
-            ->group_start()
-            ->or_like(array('rs.title' => $product_name, 'cl.product_name' => $product_name))
-            ->group_end()
-            ->get($this->tables['resource'] . ' rs')->result_array();
+        ->join($this->tables['classification'] . ' cl', 'cl.resource_id = rs.id', 'left')
+        ->order_by('rs.position', 'asc')
+        ->where($where)
+        ->group_start()
+        ->or_like(array('rs.title' => $product_name, 'cl.product_name' => $product_name))
+        ->group_end()
+        ->get($this->tables['resource'] . ' rs')->result_array();
         $config = $this->config->item('image');
 
         if (!empty($resources)) {
@@ -391,10 +402,10 @@ class Api_model extends CI_Model
 
         if (!empty($where)) {
             $resource = $this->db->select('fs.file_type as display_type ,cl.product_type')
-                ->join($this->tables['resource'] . ' rs', 'fs.id = rs.file_id')
-                ->join($this->tables['classification'] . ' cl', 'cl.resource_id = rs.id')
-                ->where($where)
-                ->get($this->tables['file'] . ' fs')->row();
+            ->join($this->tables['resource'] . ' rs', 'fs.id = rs.file_id')
+            ->join($this->tables['classification'] . ' cl', 'cl.resource_id = rs.id')
+            ->where($where)
+            ->get($this->tables['file'] . ' fs')->row();
 
             $data = array(
                 'product_type' => $resource->product_type,
@@ -410,7 +421,7 @@ class Api_model extends CI_Model
     {
 
         $row = $this->db->select('id,views_count')
-            ->where($data)->get($this->tables['analytic'])->row();
+        ->where($data)->get($this->tables['analytic'])->row();
 
         if (!empty($row) && $row->id) {
             $data['views_count'] = $row->views_count + 1;
@@ -430,7 +441,7 @@ class Api_model extends CI_Model
         }
         $data = convet_secure_input($params, true);
         $data['created'] = date('y-m-d h:i:sa');
-        $this->db->insert($this->tables['email'], $data);
+        $this->db->insert($this->tables['chat'], $data);
         return $this->db->insert_id() > 0 ? 'success' : 'error';
     }
 }

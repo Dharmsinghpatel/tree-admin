@@ -33,6 +33,9 @@ $(document).ready(function () {
             title: {
                 required: true,
             },
+            slug: {
+                required: true,
+            },
             display_type: {
                 required: true,
             },
@@ -40,10 +43,10 @@ $(document).ready(function () {
                 required: true,
             },
             icon: {
-                required: function (ele) {
-                    const file = $('#icon_id');
-                    return !(file.attr('value') > 0);
-                },
+                // required: function (ele) {
+                //     const file = $('#icon_id');
+                //     return !(file.attr('value') > 0);
+                // },
                 extension: 'png|jpg|jpeg'
             }
         }

@@ -242,4 +242,33 @@ class Resources_model extends CI_Model
 
         return $chart_data;
     }
+
+    function show_resource($id)
+    {
+        $resource = $this->get_resource($id);
+        $html = '';
+
+        if (!empty($resource)) {
+            $rs = $resource;
+            $html = '';
+            $file = $this->database->get_file($rs->file_id);
+
+            switch ($rs->resource_type) {
+                case 'image':
+                    $html = render_image_popup($file);
+                    break;
+                case  'site':
+                    $html = render_link($file);
+                    break;
+                case 'video':
+                    $file_2 = $this->database->get_file($rs->file_id_2);
+                    $html = render_video_popup($file, $file_2);
+                    break;
+                default:
+                    $html = 'Error';
+            }
+        }
+
+        return  $html;
+    }
 }

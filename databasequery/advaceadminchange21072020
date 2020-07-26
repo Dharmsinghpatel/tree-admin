@@ -1,0 +1,12 @@
+ALTER TABLE `documents` ADD `publish_time` DATETIME NULL AFTER `is_topic`, ADD `is_active` TINYINT NULL AFTER `publish_time`;
+
+ALTER TABLE `classification` CHANGE `product_type` `product_type` ENUM('crop','animal','fertilizer','pesticides','plant','none','flower','tree','insects') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
+
+ALTER TABLE `metadata` DROP `active`;
+
+ALTER TABLE `documents` CHANGE `publish_time` `publish_time` DATE NULL DEFAULT NULL;
+
+ALTER TABLE `email` CHANGE `email` `contact` VARCHAR(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;
+
+RENAME TABLE `agriarbor`.`email` TO `agriarbor`.`chat`;
+

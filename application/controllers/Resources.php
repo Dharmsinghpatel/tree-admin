@@ -45,13 +45,19 @@ class Resources extends CI_Controller
         foreach ($resources->result_array() as $r) {
             $edit_link = site_url('/resources/add-resource/' . $r['id']);
             $delete_link = site_url('/resources/delete-resource/' . $r['id']);
+            $show_link = site_url('/resources/show-resource/' . $r['id']);
+
             $data[] = array(
                 "DT_RowId" => $r['id'],
                 $i,
                 $r['title'],
                 $r['resource_type'],
                 $r['created'],
-                '<a class="mr-10" href="' . $edit_link . '">
+                '
+                <a class="mr-10" href="javascript:void(0)">
+                    <button class="btn btn-outline-primary show" data-show-url="' . $show_link . '"><span class="fa fa-eye"></span></button>
+                </a> 
+                <a class="mr-10" href="' . $edit_link . '">
                     <button class="btn btn-outline-primary ">Edit</button>
                 </a> 
                 <a class="mr-10" href="javascript:void(0)">
@@ -150,6 +156,16 @@ class Resources extends CI_Controller
             $res = array('status' => 'success', 'file' => $file);
         }
         echo json_encode($res);
+    }
+
+    public function show_resource($id = null)
+    {
+        $data = array('status' => 'error', 'html' => '');
+        if (!empty($id)) {
+            $html = $this->resource->show_resource($id);
+            $data = array('status' => 'success', 'html' => $html);
+        }
+        echo json_encode($data);
     }
 }
 ?>

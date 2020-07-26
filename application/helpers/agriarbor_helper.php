@@ -50,8 +50,30 @@ if (!function_exists('render_image')) {
         $path = site_url($config_image['upload_path']) . "/" . $file->unique_name;
         return '<div class="form-row" id="image">
                     <div class="col-8">
-                        <label for="image">image<span class="text-danger">*</span></label>
+                        <label for="image">Image<span class="text-danger">*</span></label>
                         <input type="file" class="form-control p-0 border-0" id="image" name="image">
+                    </div>
+                    <div class="col-4">
+                        <label>' . $file->file_name . '</label>
+                            <img src="' . $path . '" class="w-100">
+                    </div>
+                </div>';
+    }
+}
+
+/**
+ * render popup image with name 
+ */
+if (!function_exists('render_image_popup')) {
+    function render_image_popup($file)
+    {
+        $ci = &get_instance();
+        $config_image = $ci->config->item('image');
+        $path = site_url($config_image['upload_path']) . "/" . $file->unique_name;
+        return '<div class="form-row" id="image">
+                    <div class="col-8">
+                        <label for="image">Image Path</label>
+                        <textarea class="form-control" rows="5">' . $path . '</textarea>
                     </div>
                     <div class="col-4">
                         <label>' . $file->file_name . '</label>
@@ -105,6 +127,36 @@ if (!function_exists('render_video')) {
                 </div>';
     }
 }
+
+/**
+ * render popup video link and thumbnail 
+ */
+if (!function_exists('render_video_popup')) {
+    function render_video_popup($file, $file_2)
+    {
+
+        $ci = &get_instance();
+        $config_image = $ci->config->item('image');
+        $path = site_url($config_image['upload_path']) . "/" . $file_2->unique_name;
+
+        return '<div class="form-row" id="image">
+                    <div class="col-8">
+                        <label for="image">Image Path</label>
+                        <textarea class="form-control" rows="5">' . $path . '</textarea>
+                    </div>
+                    <div class="col-4">
+                        <label>' . $file->file_name . '</label>
+                            <img src="' . $path . '" class="w-100">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Video Id</label>
+                    <input type="text" class="form-control" value="' . $file->unique_name . '" >
+                </div>
+                ';
+    }
+}
+
 
 /**
  * render description of document
@@ -209,7 +261,7 @@ if (!function_exists('render_email_modal')) {
                     </div>
                     <div class="form-group">
                         <label>Email<span class="text-danger">*</span></label>
-                        <p class="font-weight-bold">'  . $data->email . '</p>
+                        <p class="font-weight-bold">'  . $data->contact . '</p>
                     </div>
                     <div class="form-group">
                         <label>Comment<span class="text-danger">*</span></label>

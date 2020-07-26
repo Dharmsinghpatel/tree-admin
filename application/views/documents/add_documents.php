@@ -7,23 +7,45 @@ defined('BASEPATH') or exit('No direct script access allowed');
 </div>
 <hr>
 <form id="add-document" method="POST" enctype="multipart/form-data">
-    <div class="form-group">
-        <label for="title">Title<span class="text-danger">*</span></label>
-        <input type="hidden" name="document_id" value="<?php echo isset($detail) ? $detail['general_detail']->id : ''; ?>">
-        <input type="text" class="form-control" id="title" name="title" value="<?php echo isset($detail) ? $detail['general_detail']->title : '' ?>" placeholder="Title" autofocus>
-        <small class="text-danger"><?php echo form_error('title'); ?></small>
+    <div class="form-row">
+        <div class="col">
+            <div class="form-group">
+                <label for="title">Title<span class="text-danger">*</span></label>
+                <input type="hidden" name="document_id" value="<?php echo isset($detail) ? $detail['general_detail']->id : ''; ?>">
+                <input type="text" class="form-control" id="title" name="title" value="<?php echo isset($detail) ? $detail['general_detail']->title : '' ?>" placeholder="Title" autofocus>
+                <small class="text-danger"><?php echo form_error('title'); ?></small>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="form-group">
+                <label for="slug">Slug<span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="slug" name="slug" value="<?php echo isset($detail) ? str_replace('-', ' ', $detail['general_detail']->slug) : '' ?>" placeholder="Slug Title" autofocus>
+                <small class="text-danger"><?php echo form_error('slug'); ?></small>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label for="display_type">Display Type<span class="text-danger">*</span></label>
-        <select class="form-control" id="display_type" name="display_type">
-            <option value="<?php echo isset($detail) ? $detail['general_detail']->display_type : '' ?>"><?php echo isset($detail) && !empty($detail['general_detail']->display_type) ? $detail['general_detail']->display_type : 'Select Display Type' ?></option>
-            <option value="">Select Display Type</option>
-            <option value="info">Info</option>
-            <option value="news">News</option>
-            <option value="blog">Blog</option>
-        </select>
-        <small class="text-danger"><?php echo form_error('display_type'); ?></small>
+    <div class="form-row">
+        <div class="col">
+            <div class="form-group">
+                <label for="display_type">Display Type<span class="text-danger">*</span></label>
+                <select class="form-control" id="display_type" name="display_type">
+                    <option value="<?php echo isset($detail) ? $detail['general_detail']->display_type : '' ?>"><?php echo isset($detail) && !empty($detail['general_detail']->display_type) ? $detail['general_detail']->display_type : 'Select Display Type' ?></option>
+                    <option value="">Select Display Type</option>
+                    <option value="info">Info</option>
+                    <option value="news">News</option>
+                    <option value="blog">Blog</option>
+                </select>
+                <small class="text-danger"><?php echo form_error('display_type'); ?></small>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-group">
+                <label for="publish_time">Publish Time</label>
+                <input type="date" class="form-control" id="publish_time" name="publish_time" value="<?php echo isset($detail) ? $detail['general_detail']->publish_time : '' ?>" placeholder="Start Date">
+            </div>
+        </div>
     </div>
 
     <div class="form-row">
@@ -38,6 +60,10 @@ defined('BASEPATH') or exit('No direct script access allowed');
                     <option value="crop">Crop</option>
                     <option value="fertilizer">Fertilizer</option>
                     <option value="pesticides">Pesticides</option>
+                    <option value="plant">Plant</option>
+                    <option value="flower">Flower</option>
+                    <option value="insects">Insects</option>
+                    <option value="tree">Tree</option>
                 </select>
                 <small class="text-danger"><?php echo form_error('product_type'); ?></small>
             </div>
@@ -63,7 +89,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <div class="form-row">
         <div class="col">
             <div class="form-group" id="icon">
-                <label for="icon">Icon<span class="text-danger">*</span></label>
+                <label for="icon">Icon</label>
                 <input type="hidden" id='icon_id' name="icon_id" value="<?php echo isset($detail) ? $detail['general_detail']->icon : ''; ?>">
                 <input type="file" class="form-control p-0 border-0" id="icon" name="icon">
             </div>
@@ -71,22 +97,23 @@ defined('BASEPATH') or exit('No direct script access allowed');
         <div class="<?php echo isset($detail) ? ($detail['general_detail']->icon ? 'col-4' : 'col-4 d-none') : 'col d-none' ?>">
             <?php echo isset($detail) ? get_resource($detail['general_detail']->icon) : ''; ?>
         </div>
+        <div class="col">
+            <div class="form-group <?php echo isset($detail) && $detail['general_detail']->icon ? '' : 'd-none' ?>">
+                <label for="icon_delete">Delete</label>
+                <input type="checkbox" class="form-control w-20px" id="icon_delete" name="icon_delete">
+            </div>
+        </div>
     </div>
 
     <hr>
 
     <div class="form-group">
-        <label for="meta_active">Active Metadata</label>
-        <input type="checkbox" id="meta_active" name="meta_active" <?php echo isset($detail) ? ($detail['general_detail']->meta_active ? 'checked' : '') : '' ?>>
-    </div>
-
-    <div class="form-group">
-        <label for="keywords">Keywords</label>
+        <label for="keywords">Meta Data Keywords</label>
         <input type="text" class="form-control" id="keywords" name="keywords" value="<?php echo isset($detail) ? $detail['general_detail']->keywords : '' ?>" placeholder="Keywords">
     </div>
 
     <div class="form-group">
-        <label for="meta_description">Decription</label>
+        <label for="meta_description">Meta Data Decription</label>
         <textarea type="text" class="form-control" id="meta_description" name="meta_description" placeholder="Description"><?php echo isset($detail) ? $detail['general_detail']->meta_description : '' ?></textarea>
     </div>
 

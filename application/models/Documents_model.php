@@ -12,27 +12,27 @@ class Documents_model extends CI_Model
 
     function get_documents($content_type)
     {
-        $documents = $this->db->select('dc.id,dc.title,dc.is_topic,dc.created,dc.updated')
-            ->order_by('position', 'asc')
-            ->where(array('is_topic' => null, 'display_type' => $content_type))
-            ->get($this->tables['document'] . ' dc');
+        $documents = $this->db->select('dc.id,dc.title,dc.is_topic,dc.is_active,dc.created,dc.updated')
+        ->order_by('position', 'asc')
+        ->where(array('is_topic' => null, 'display_type' => $content_type))
+        ->get($this->tables['document'] . ' dc');
 
         $document_list = array();
         if (!empty($documents->result_array())) {
             foreach ($documents->result_array() as $key => $resource) {
                 $topics_id = $this->db->select('ct.topic_id')
-                    ->order_by('ct.position', 'asc')
-                    ->where(array('ct.document_id' => $resource['id'], 'ct.topic_id !=' => null, 'ct.content_type' => 'topic'))
-                    ->get($this->tables['contents'] . ' ct')
-                    ->result_array();
+                ->order_by('ct.position', 'asc')
+                ->where(array('ct.document_id' => $resource['id'], 'ct.topic_id !=' => null, 'ct.content_type' => 'topic'))
+                ->get($this->tables['contents'] . ' ct')
+                ->result_array();
 
                 $document_list[] = $resource;
 
                 foreach ($topics_id as $key => $topic) {
                     $topic = $this->db->select('dc.id,dc.title,dc.is_topic,dc.created,dc.updated')
-                        ->where('dc.id', $topic['topic_id'])
-                        ->get($this->tables['document'] . ' dc')
-                        ->result_array();
+                    ->where('dc.id', $topic['topic_id'])
+                    ->get($this->tables['document'] . ' dc')
+                    ->result_array();
                     if (!empty($topic)) {
                         $document_list[] = $topic[0];
                     }
@@ -46,13 +46,15 @@ class Documents_model extends CI_Model
     {
         extract($params);
 
-        $url = isset($url) ? $url : null;
-        $icon_id = isset($icon_id) ? $icon_id : null;
+        // p($params);
+        // die;
+
+        $slug = isset($slug) ? $slug : null;
         $document_id = isset($document_id) ? $document_id : null;
+        $icon_delete = isset($icon_delete)  && !empty($icon_delete);
+        $icon_id = isset($icon_id) && !empty($icon_id) ? $icon_id : null;
         $exist_topics = isset($exist_topics) ? $exist_topics : array();
         $exist_documents = isset($exist_documents) ? $exist_documents : array();
-
-        $meta_active = isset($meta_active) ? 1 : 0;
 
         if (!isset($title) || empty($title)) {
             return;
@@ -63,12 +65,14 @@ class Documents_model extends CI_Model
             $icon_id = is_numeric($icon_id) ? $icon_id : null;
         }
 
-        $slug = $this->clean_slug($title, $this->tables['document'], $document_id);
+        $slug = $this->clean_slug($slug, $this->tables['document'], $document_id);
+
         $data = array(
             'title' => $title,
+            'publish_time' => $publish_time,
             'slug' => $slug,
             'display_type' => $display_type,
-            'icon' => $icon_id
+            'icon' => !$icon_delete ? $icon_id : null
         );
 
         $data_class = array(
@@ -82,8 +86,7 @@ class Documents_model extends CI_Model
             'slug' => $slug,
             'document_id' => $document_id,
             'keywords' => $keywords,
-            'description' => $meta_description,
-            'active' => $meta_active
+            'description' => $meta_description
         );
 
         $this->db->trans_start();
@@ -92,35 +95,35 @@ class Documents_model extends CI_Model
         if (isset($document_id) && !empty($document_id)) {
             $data['updated'] = date('Y-m-d h:i:sa');
             $this->db->where('id', $document_id)
-                ->update($this->tables['document'], $data);
+            ->update($this->tables['document'], $data);
 
             $is_classification = $this->db->where('document_id', $document_id)->from($this->tables['classification'])->count_all_results();
 
             $is_classification == 1 ?
-                $this->db->where('document_id', $document_id)
-                ->update($this->tables['classification'], $data_class)
-                :
-                $this->db->insert($this->tables['classification'], $data_class);
+            $this->db->where('document_id', $document_id)
+            ->update($this->tables['classification'], $data_class)
+            :
+            $this->db->insert($this->tables['classification'], $data_class);
 
             $is_metadata = $this->db->where('document_id', $document_id)->from($this->tables['metadata'])->count_all_results();
 
             $is_metadata == 1 ?
-                $this->db->where('document_id', $document_id)
-                ->update($this->tables['metadata'], $metadata)
-                :
-                $this->db->insert($this->tables['metadata'], $metadata);
+            $this->db->where('document_id', $document_id)
+            ->update($this->tables['metadata'], $metadata)
+            :
+            $this->db->insert($this->tables['metadata'], $metadata);
 
 
             //delete description and files
             $this->db->where(array('document_id' => $document_id))
-                ->where('content_type != "topic" AND content_type != "document"')
-                ->delete($this->tables['contents']);
+            ->where('content_type != "topic" AND content_type != "document"')
+            ->delete($this->tables['contents']);
 
             //delete document/topic
             $topics  = $this->db->select('ct.topic_id ,ct.content_type')
-                ->where(array('document_id' => $document_id))
-                ->where('content_type = "topic" OR content_type = "document"')
-                ->get($this->tables['contents'] . ' ct')->result_array();
+            ->where(array('document_id' => $document_id))
+            ->where('content_type = "topic" OR content_type = "document"')
+            ->get($this->tables['contents'] . ' ct')->result_array();
             $topics_id = array_column($topics, 'topic_id');
 
             foreach ($topics_id as $key => $id) {
@@ -128,20 +131,25 @@ class Documents_model extends CI_Model
                     $this->delete_documents($id, 1);
                 } else if ($topics[$key]['content_type'] == 'document' && !in_array($id, $exist_documents)) {
                     $this->db->where(array('topic_id' => $id))
-                        ->delete($this->tables['contents']);
+                    ->delete($this->tables['contents']);
                 }
             }
         } else {
             $pos = $this->db->select_max('position')
-                ->get($this->tables['document'])->row();
+            ->get($this->tables['document'])->row();
 
             $data['position'] = $pos ? $pos->position + 1 : 1;
             $data['created'] = date('Y-m-d h:i:sa');
+            $data['is_active'] = 0;
 
             $this->db->insert($this->tables['document'], $data);
             $document_id = $data_class['document_id'] = $metadata['document_id'] = $this->db->insert_id();
             $this->db->insert($this->tables['classification'], $data_class);
             $this->db->insert($this->tables['metadata'], $metadata);
+        }
+
+        if ($icon_delete && $icon_id) {
+            $this->database->unlink_file($icon_id);
         }
 
         $documents_row = array();
@@ -173,9 +181,9 @@ class Documents_model extends CI_Model
                         if (isset($exist_topics) && !empty($exist_topics[$topic_index])) {
                             $topic_content['updated'] = date('Y-m-d h:i:sa');
                             $this->db->where('id', $exist_topics[$topic_index])
-                                ->update($this->tables['document'], $topic_content);
+                            ->update($this->tables['document'], $topic_content);
                             $this->db->where('topic_id', $exist_topics[$topic_index])
-                                ->update($this->tables['contents'], array('description' => $document[1][0], 'position' => $i));
+                            ->update($this->tables['contents'], array('description' => $document[1][0], 'position' => $i));
                         } else {
                             $topic_content['created'] = date('Y-m-d h:i:sa');
                             $this->db->insert($this->tables['document'], $topic_content);
@@ -193,14 +201,14 @@ class Documents_model extends CI_Model
                     } else if (array_key_exists('3', $document) && !empty($document[3][0])) {
                         if (isset($exist_documents) && !empty($exist_documents[$document_index])) {
                             $temp_doc = $this->db->select('title')
-                                ->where('id', $exist_documents[$document_index])
-                                ->get($this->tables['document'])->row();
+                            ->where('id', $exist_documents[$document_index])
+                            ->get($this->tables['document'])->row();
                             $this->db->where('topic_id', $exist_documents[$document_index])
-                                ->update($this->tables['contents'], array('description' =>  $temp_doc->title, 'position' => $i));
+                            ->update($this->tables['contents'], array('description' =>  $temp_doc->title, 'position' => $i));
                         } else {
                             $temp_doc = $this->db->select('title')
-                                ->where('id', $document[3][0])
-                                ->get($this->tables['document'])->row();
+                            ->where('id', $document[3][0])
+                            ->get($this->tables['document'])->row();
 
                             $temp['topic_id'] = $document[3][0];
                             $temp['content_type'] = 'document';
@@ -212,8 +220,8 @@ class Documents_model extends CI_Model
                 }
             }
             !empty($documents_row) ?
-                $this->db->insert_batch($this->tables['contents'], $documents_row) :
-                '';
+            $this->db->insert_batch($this->tables['contents'], $documents_row) :
+            '';
         }
         $this->db->trans_complete();
         if ($this->db->trans_status() === FALSE) {
@@ -232,7 +240,7 @@ class Documents_model extends CI_Model
         $slug = trim(preg_replace('/[[:space:]]+/', '-', $simpleText));
 
         $num = $this->db->from($table)->where(array('slug' => $slug))
-            ->where('id !=', $id)->get()->num_rows();
+        ->where('id !=', $id)->get()->num_rows();
 
         if ($num == 0) {
             return $slug;
@@ -246,12 +254,12 @@ class Documents_model extends CI_Model
         $flag = 'error';
         if (!empty($id)) {
             $document_detail  = $this->db->select('dc.icon as file_id')
-                ->where(array('dc.id' => $id))
-                ->get($this->tables['document'] . ' dc')->row();
+            ->where(array('dc.id' => $id))
+            ->get($this->tables['document'] . ' dc')->row();
 
             $topics  = $this->db->select('ct.topic_id ,ct.content_type')
-                ->where(array('document_id' => $id, 'content_type' => 'topic'))
-                ->get($this->tables['contents'] . ' ct')->result_array();
+            ->where(array('document_id' => $id, 'content_type' => 'topic'))
+            ->get($this->tables['contents'] . ' ct')->result_array();
 
             $topics_id = array_column($topics, 'topic_id');
 
@@ -270,8 +278,8 @@ class Documents_model extends CI_Model
             }
 
             $topic_where = $is_topic && !empty($is_topic) ?
-                array('topic_id' => $id)
-                : array('document_id' => $id);
+            array('topic_id' => $id)
+            : array('document_id' => $id);
 
 
             //delete classification
@@ -279,9 +287,9 @@ class Documents_model extends CI_Model
             $this->db->trans_strict(FALSE);
 
             $this->db->where('document_id', $id)
-                ->delete($this->tables['classification']);
+            ->delete($this->tables['classification']);
             $this->db->where($topic_where)
-                ->delete($this->tables['contents']);
+            ->delete($this->tables['contents']);
 
             $this->db->trans_complete();
             if ($this->db->trans_status() === FALSE) {
@@ -294,7 +302,10 @@ class Documents_model extends CI_Model
             $this->db->trans_strict(FALSE);
 
             $is_delete = $this->db->delete($this->tables['document'], array('id' => $id));
-            $this->database->unlink_file($document_detail->file_id);
+
+            if(!empty($document_detail->file_id)){
+                $this->database->unlink_file($document_detail->file_id);
+            }
 
             $flag = $is_delete > 0 ? 'success' : 'error';
             $this->db->trans_complete();
@@ -307,20 +318,39 @@ class Documents_model extends CI_Model
         return $flag;
     }
 
+    function active_documents($id = null)
+    {
+        $flag = 'error';
+        if (!empty($id)) {
+            $data = $this->db->select('is_active')
+            ->where('id', $id)
+            ->get($this->tables['document'])->row();
+
+            if (!empty($data)) {
+                $is_active = empty($data->is_active) ? 1 : 0;
+                $this->db->where('id', $id)
+                ->update($this->tables['document'], array('is_active' => $is_active));
+                $flag = 'success';
+            }
+        }
+
+        return array('status' => $flag, 'is_active' => $is_active);
+    }
+
     function get_detail($id)
     {
         $document = array();
         if (!empty($id)) {
-            $document['general_detail'] = $this->db->select('dc.id, dc.title, dc.display_type, dc.is_topic, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use, mt.keywords, mt.active as meta_active, mt.description as meta_description')
-                ->join($this->tables['classification'] . ' cl', 'cl.document_id = dc.id', 'left')
-                ->join($this->tables['metadata'] . ' mt', 'mt.document_id = dc.id', 'left')
-                ->where('dc.id', $id)
-                ->get($this->tables['document'] . ' dc')->row();
+            $document['general_detail'] = $this->db->select('dc.id, dc.title, dc.publish_time, dc.slug, dc.display_type, dc.is_topic, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use, mt.keywords, mt.description as meta_description')
+            ->join($this->tables['classification'] . ' cl', 'cl.document_id = dc.id', 'left')
+            ->join($this->tables['metadata'] . ' mt', 'mt.document_id = dc.id', 'left')
+            ->where('dc.id', $id)
+            ->get($this->tables['document'] . ' dc')->row();
 
             $resources = $this->db->select('ct.description, ct.resource_id, ct.topic_id, ct.content_type as resource_type')
-                ->order_by('position', 'asc')
-                ->where('document_id', $id)
-                ->get($this->tables['contents'] . ' ct')->result_array();
+            ->order_by('position', 'asc')
+            ->where('document_id', $id)
+            ->get($this->tables['contents'] . ' ct')->result_array();
 
             $document['resources'] = '';
 
@@ -329,21 +359,21 @@ class Documents_model extends CI_Model
                 foreach ($resources as $key => $resource) {
                     switch ($resource['resource_type']) {
                         case 'description':
-                            $document['resources'] .= render_description($resource, $desc_num);
-                            $desc_num += 1;
-                            break;
+                        $document['resources'] .= render_description($resource, $desc_num);
+                        $desc_num += 1;
+                        break;
                         case 'file':
-                            $resource_detail = $this->resource->get_resource($resource['resource_id']);
-                            $document['resources'] .= render_files($resource, $resource_detail);
-                            break;
+                        $resource_detail = $this->resource->get_resource($resource['resource_id']);
+                        $document['resources'] .= render_files($resource, $resource_detail);
+                        break;
                         case 'topic':
-                            $document['resources'] .= render_topic($resource);
-                            break;
+                        $document['resources'] .= render_topic($resource);
+                        break;
                         case 'document':
-                            $document['resources'] .= render_topic($resource, 3);
-                            break;
+                        $document['resources'] .= render_topic($resource, 3);
+                        break;
                         default:
-                            $document['resources'] .= 'Error';
+                        $document['resources'] .= 'Error';
                     }
                 }
             }
@@ -359,7 +389,7 @@ class Documents_model extends CI_Model
         foreach ($sort_array as $val) {
             if (!empty($val) && $val != "null") {
                 $this->db->where('id', $val)
-                    ->update($this->tables['document'], array('position' => $order));
+                ->update($this->tables['document'], array('position' => $order));
 
                 $order += 1;
                 $status = 'success';
@@ -372,9 +402,9 @@ class Documents_model extends CI_Model
     {
         $where = !empty($id) ? array('dc.id' => $id) : array('dc.is_topic' => NULL);
         return $this->db->select('dc.id,dc.title')
-            ->order_by('dc.position', 'asc')
-            ->where($where)
-            ->get($this->tables['document'] . ' dc')
-            ->result_array();
+        ->order_by('dc.position', 'asc')
+        ->where($where)
+        ->get($this->tables['document'] . ' dc')
+        ->result_array();
     }
 }

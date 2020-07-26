@@ -574,3 +574,12 @@
     margin-top: 10px;
     border-bottom: 0;
 }
+
+.w-20px{
+  width: 20px;
+}
+
+.unread-chat{
+  font-weight: 900;
+}
+

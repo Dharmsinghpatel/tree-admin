@@ -65,6 +65,7 @@ class Database_model extends CI_Model
             $res = $this->db->where('id', $file_id)
                 ->delete($this->tables['files']);
             return $res > 0;
+            return true;
         }
     }
 
