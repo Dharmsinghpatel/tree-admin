@@ -15,6 +15,7 @@ class Api_model extends CI_Model
         $this->tables = array('resource' => 'resources', 'carousel' => 'carousel', 'file' => 'files', 'document' => 'documents', 'content' => 'contents', 'classification' => 'classification', 'analytic' => 'analytic', 'chat' => 'chat', 'setting' => 'setting', 'metadata' => 'metadata');
         $this->load->model('database_model', 'database');
         $this->load->model('resources_model', 'resource');
+        $this->load->model('documents_model', 'document');  
 
         $setting = $this->db->select('*')->get($this->tables['setting'])->row();
 
@@ -111,17 +112,12 @@ class Api_model extends CI_Model
                 break;
             }
         }
-        $route = 'videos';
 
-        $meta_data = array(
-            array('name' => 'description', 'content' => ''),
-            array('name' => 'keywords', 'content' => 'agriarbor, ' . $route . ', agri arbor' . $route . ', agriarbor ' . $route . '')
-        );
+        $meta_data = array( 
+            array('name' => 'description', 'content' => 'Agri Arbor कृषि संबंधित विभिन्न जानकारियों के लिए समर्पित है। Agri Arbor में वीडियो, ब्लॉग, न्यूज़ की सीरीज़ हैं जो कृषि में एक बेहतरीन रास्ता निकालने का सुझाव देते हैं।'),   
+            array('name' => 'keywords', 'content' => 'agriarbor, home, agri arbor home, agriarbor home')    
+        );  
 
-        $meta_data = array(
-            array('name' => 'description', 'content' => 'Agri Arbor\'s  फसल, पशु, पौधे, खाद, कीटनाशक आदि का बुनियादी ज्ञान , videos, blogs प्रदान करती है।'),
-            array('name' => 'keywords', 'content' => 'agriarbor, home, agri arbor home, agriarbor home')
-        );
 
         $dashboard = array(
             'carousel' => $carousel,
@@ -150,13 +146,11 @@ class Api_model extends CI_Model
         // $id = custom_secure_data($id, false);
         $id = trim($id);
 
-        $document = $this->db->select('dc.title, dc.display_type as content_type,dc.publish_time, dc.icon, cl.product_type as cl_type, cl.product_name, cl.product_use')
+        $document = $this->db->select('dc.title, dc.display_type as content_type,dc.publish_time, cl.product_type as cl_type, cl.product_name, cl.product_use')
         ->join('classification cl', 'cl.document_id = dc.id', 'left')
         ->where(array('dc.slug'=> $id,'dc.is_active>'=>0))
         ->get($this->tables['document'] . ' dc')->result_array();
 
-        // $meta_keywords = '';
-        // $meta_description = '';
         if (!empty($document)) {
             $document = $document[0];
             // $meta_keywords = implode(', ', array_values($document));
@@ -171,11 +165,13 @@ class Api_model extends CI_Model
                 $this->analytic_manager($data_analytic);
             }
 
-            if(!empty($document['icon'])){
-                $config = $this->config->item('image');
-                $file = $this->database->get_file($document['icon']);
-                $document['icon'] = site_url($config['upload_path']) . "/" . $file->unique_name;
-            }
+            // if(!empty($document['icon'])){
+            //     $config = $this->config->item('image');
+            //     $file = $this->database->get_file($document['icon']);
+            //     $document['icon'] = site_url($config['upload_path']) . "/" . $file->unique_name;
+
+            //     $document['icon']=null;
+            // }
 
 
             $document['publish_time'] = $document['publish_time'] && $document['publish_time']!= '0000-00-00'?$document['publish_time']:null;
@@ -187,7 +183,6 @@ class Api_model extends CI_Model
             ->where('dc.slug', $id)
             ->get($this->tables['content'] . ' ct')->result_array();
 
-            // d($contents);
             $document['detail'] = array();
             if (isset($contents) && !empty($contents)) {
                 foreach ($contents as $key => $content) {
@@ -196,7 +191,6 @@ class Api_model extends CI_Model
                         case 'description':
                         $temp['type'] = $content['content_type'];
                         $temp['description'] = $content['description'];
-                            // $meta_description = ($meta_description == '') ? cut_text($content['description'], 81) : $meta_description;
                         break;
                         case 'file':
                         $resource_detail = $this->resource->get_resource($content['resource_id']);
@@ -208,8 +202,10 @@ class Api_model extends CI_Model
                             //     break;
                         case 'document':
                         $temp['type'] = $content['content_type'];
-                            // $temp['document_id'] = custom_secure_data($content['topic_id']);
-                        $temp['document_id'] = $content['slug'];
+
+                        $temp['document_id'] = $this->document->get_document_detail($content['topic_id'])[0]['slug'];
+
+                        // $temp['document_id'] = $content['slug'];
                         $temp['title'] = $content['description'];
                         $temp['display_type'] = 'info';
                         break;
@@ -219,6 +215,28 @@ class Api_model extends CI_Model
             }
         }
 
+        /* To convert continue images in row*/
+        $temp_images=[];
+        $rows=[];
+        
+        foreach ($document['detail'] as $key => $row) {
+            if($row['type']!='image'){
+                 if(count($temp_images)){
+                  array_push($rows, array('type'=>'image','images'=>$temp_images));
+                }
+                array_push($rows, $row);
+                $temp_images=[];
+            }else{
+                array_push($temp_images, $row);
+            }
+
+        }
+
+        if(count($temp_images)){
+             array_push($rows, array('type'=>'image','images'=>$temp_images));
+        }
+
+        $document['detail'] = $rows;
 
         $metadata_row = $this->db->select('mt.description, mt.keywords')
         ->where(array('mt.slug' => $id))
@@ -263,7 +281,7 @@ class Api_model extends CI_Model
         $documents = $this->db->select('dc.id, dc.display_type, dc.title,
             publish_time, fs.unique_name as image_url, fs.file_name, dc.slug')
         ->join($this->tables['file'] . ' fs', 'fs.id = dc.icon', 'left')
-        ->order_by('position', 'asc')
+        ->order_by('id', 'desc')
         ->where(array('dc.is_topic' => null, 'dc.display_type' => $topics_type,'dc.is_active>'=>0))
         ->get($this->tables['document'] . ' dc')->result_array();
 
@@ -289,8 +307,18 @@ class Api_model extends CI_Model
             $topics[] = $document;
         }
 
+        $metaDesc ='Agri Arbor\'s ' . $topics_type . ' फसल, पशु, पौधे, खाद, कीटनाशक आदि का बुनियादी ज्ञान प्रदान करती है।';
+
+        switch ($topics_type) {
+            case 'blog':
+               $metaDesc ='Agri Arbor\'s blog कृषि उत्पादों जैसे फसल, पशु, पौधे, खाद, कीटनाशक आदि देखभाल की प्रक्रिया, उत्पादों को बनाने और ये कैसे काम करता है, इसके बारे में बताता है।';
+                break;
+               case 'news':
+                $metaDesc = 'Agri Arbor\'s news शासन की योजनाओं, कृषि संबंधी समाचारों के साथ आता है, जो बुनियादी ज्ञान प्रदान करता है।';
+        }
+
         $meta_data = array(
-            array('name' => 'description', 'content' => 'Agri Arbor\'s ' . $topics_type . ' फसल, पशु, पौधे, खाद , कीटनाशक आदि का बुनियादी ज्ञान प्रदान करती है।'),
+            array('name' => 'description', 'content' => $metaDesc ),
             array('name' => 'keywords', 'content' => 'agriarbor, ' . $topics_type . ', agri arbor ' . $topics_type . ', agriarbor ' . $topics_type . '')
         );
 
@@ -321,7 +349,7 @@ class Api_model extends CI_Model
         $route = 'videos';
 
         $meta_data = array(
-            array('name' => 'description', 'content' => 'Agri Arbor\'s videos फसल, पशु, पौधे, खाद, कीटनाशक आदि का बुनियादी ज्ञान प्रदान करती है।'),
+            array('name' => 'description', 'content' => 'Agri Arbor\'s videos कृषि उत्पादों जैसे फसल, पशु, पौधे, खाद, कीटनाशक आदि देखभाल की प्रक्रिया, उत्पादों को बनाने और ये कैसे काम करता है, इसके बारे में बताता है।'),
             array('name' => 'keywords', 'content' => 'agriarbor, ' . $route . ', agri arbor ' . $route . ', agriarbor ' . $route . '')
         );
 
@@ -332,12 +360,12 @@ class Api_model extends CI_Model
     {
         extract($params);
         $where = $product_type == 'all' ?
-        array('dc.is_topic' => null, 'dc.display_type' => $display_type) :
-        array('dc.is_topic' => null, 'dc.display_type' => $display_type, 'cl.product_type' => $product_type);
+        array('dc.is_topic' => null, 'dc.display_type' => $display_type, 'dc.is_active>'=>0) :
+        array('dc.is_topic' => null, 'dc.display_type' => $display_type, 'cl.product_type' => $product_type, 'dc.is_active>'=>0);
         $documents = $this->db->select('dc.id, dc.display_type, dc.title, fs.unique_name as image_url, fs.file_name')
         ->join($this->tables['classification'] . ' cl', 'cl.document_id = dc.id', 'left')
         ->join($this->tables['file'] . ' fs', 'fs.id = dc.icon', 'left')
-        ->order_by('dc.position', 'asc')
+        ->order_by('dc.id', 'desc')
         ->where($where)
         ->group_start()
         ->or_like(array('dc.title' => $product_name, 'cl.product_name' => $product_name, 'cl.product_use' => $product_name))

@@ -29,7 +29,18 @@ class Auth_model extends CI_Model
             'file_id' => $logo_id,
         );
 
-        ($is_change_pass) ? $data['password'] = encrypt($password, true) : '';
+        
+        if($is_change_pass) {
+
+            $profile = $this->db->select('us.password')->where('us.id', $id)->get($this->tables['user'] . ' us')->row();
+
+            $data['password']=encrypt($password,true);
+
+            if(!check_password($profile->password, $crpassword)){
+                return FALSE;
+            }
+        }
+
 
         $this->db->trans_start();
         $this->db->trans_strict(FALSE);
@@ -37,7 +48,7 @@ class Auth_model extends CI_Model
         if (isset($id) && !empty($id)) {
             $data['updated'] = date('Y-m-d h:i:sa');
             $this->db->where('id', $id)
-                ->update($this->tables['user'], $data);
+            ->update($this->tables['user'], $data);
         } else {
             $data['created'] = date('Y-m-d h:i:sa');
             $this->db->insert($this->tables['user'], $data);
@@ -56,9 +67,9 @@ class Auth_model extends CI_Model
     function get_user($id)
     {
         $profle = $this->db->select('us.name,us.user_id,us.file_id as logo_id')
-            ->where('id', $id)
-            ->get($this->tables['user'] . ' us')
-            ->row();
+        ->where('id', $id)
+        ->get($this->tables['user'] . ' us')
+        ->row();
         // var_dump(check_password($profle->password, '121'));
         $profle->name = decrypt($profle->name);
         $profle->user_id = decrypt($profle->user_id);
@@ -68,14 +79,14 @@ class Auth_model extends CI_Model
     function login($user_id, $pass, $is_not_login = true)
     {
         $profile = $this->db->select('us.id,us.user_id,us.name,us.password,fs.unique_name')
-            ->join($this->tables['files'] . ' fs', 'us.file_id = fs.id', 'left')
-            ->get($this->tables['user'] . ' us')->result_array();
+        ->join($this->tables['files'] . ' fs', 'us.file_id = fs.id', 'left')
+        ->get($this->tables['user'] . ' us')->result_array();
 
         $user_data = array();
 
         if (!empty($profile)) {
             foreach ($profile as $key => $pr) {
-                if (trim($user_id) == decrypt(trim($pr['user_id'])) && $is_not_login ? check_password($pr['password'], $pass) : 1) {
+                if (trim($user_id) == decrypt(trim($pr['user_id'])) &&  (check_password($pr['password'], $pass) || !$is_not_login) ) {
                     $user_data = array(
                         'name'  => decrypt(trim($pr['name'])),
                         'id' => $pr['id'],
@@ -92,22 +103,22 @@ class Auth_model extends CI_Model
     function get_email()
     {
         $email = $this->db->select('cht.id, cht.first_name, cht.last_name,cht.is_read, cht.contact, cht.created')
-            ->order_by('cht.id', 'desc')
-            ->get($this->tables['chat'] . ' cht');
+        ->order_by('cht.id', 'desc')
+        ->get($this->tables['chat'] . ' cht');
         return $email;
     }
 
     function show_email($id)
     {
         $email = $this->db->select('cht.id, cht.first_name, cht.last_name, cht.contact, cht.comment')
-            ->where('id', $id)
-            ->get($this->tables['chat'] . ' cht')
-            ->row();
+        ->where('id', $id)
+        ->get($this->tables['chat'] . ' cht')
+        ->row();
         $html = '';
 
         if (!empty($email)) {
             $this->db->where('id', $id)
-                ->update($this->tables['chat'], array('is_read' => 1));
+            ->update($this->tables['chat'], array('is_read' => 1));
 
             $html = render_email_modal($email);
         }
@@ -117,8 +128,9 @@ class Auth_model extends CI_Model
     function delete_email($id)
     {
         $rs = $this->db->where('id', $id)
-            ->delete($this->tables['chat']);
+        ->delete($this->tables['chat']);
 
         return $rs > 0 ? 'success' : 'error';
     }
+
 }

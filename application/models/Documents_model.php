@@ -46,9 +46,6 @@ class Documents_model extends CI_Model
     {
         extract($params);
 
-        // p($params);
-        // die;
-
         $slug = isset($slug) ? $slug : null;
         $document_id = isset($document_id) ? $document_id : null;
         $icon_delete = isset($icon_delete)  && !empty($icon_delete);
@@ -60,10 +57,10 @@ class Documents_model extends CI_Model
             return;
         }
 
-        if (isset($file['icon']) && !empty($file['icon']['name'])) {
-            $icon_id = $this->database->do_upload(array('file' => $file['icon'], 'file_name' => 'icon'));
-            $icon_id = is_numeric($icon_id) ? $icon_id : null;
-        }
+        // if (isset($file['icon']) && !empty($file['icon']['name'])) {
+        //     $icon_id = $this->database->do_upload(array('file' => $file['icon'], 'file_name' => 'icon'));
+        //     $icon_id = is_numeric($icon_id) ? $icon_id : null;
+        // }
 
         $slug = $this->clean_slug($slug, $this->tables['document'], $document_id);
 
@@ -72,8 +69,9 @@ class Documents_model extends CI_Model
             'publish_time' => $publish_time,
             'slug' => $slug,
             'display_type' => $display_type,
-            'icon' => !$icon_delete ? $icon_id : null
+            'icon' =>  $icon_id 
         );
+
 
         $data_class = array(
             'product_type' => $product_type,
@@ -148,9 +146,9 @@ class Documents_model extends CI_Model
             $this->db->insert($this->tables['metadata'], $metadata);
         }
 
-        if ($icon_delete && $icon_id) {
-            $this->database->unlink_file($icon_id);
-        }
+        // if ($icon_delete && $icon_id) {
+        //     $this->database->unlink_file($icon_id);
+        // }
 
         $documents_row = array();
         $i = 0;
@@ -253,34 +251,6 @@ class Documents_model extends CI_Model
     {
         $flag = 'error';
         if (!empty($id)) {
-            $document_detail  = $this->db->select('dc.icon as file_id')
-            ->where(array('dc.id' => $id))
-            ->get($this->tables['document'] . ' dc')->row();
-
-            $topics  = $this->db->select('ct.topic_id ,ct.content_type')
-            ->where(array('document_id' => $id, 'content_type' => 'topic'))
-            ->get($this->tables['contents'] . ' ct')->result_array();
-
-            $topics_id = array_column($topics, 'topic_id');
-
-            //delete topics
-            $this->db->trans_start();
-            $this->db->trans_strict(FALSE);
-
-            foreach ($topics_id as $tid) {
-                $this->delete_documents($tid, 1);
-            }
-
-            $this->db->trans_complete();
-            if ($this->db->trans_status() === FALSE) {
-                $this->db->trans_rollback();
-                return 'error';
-            }
-
-            $topic_where = $is_topic && !empty($is_topic) ?
-            array('topic_id' => $id)
-            : array('document_id' => $id);
-
 
             //delete classification
             $this->db->trans_start();
@@ -288,7 +258,8 @@ class Documents_model extends CI_Model
 
             $this->db->where('document_id', $id)
             ->delete($this->tables['classification']);
-            $this->db->where($topic_where)
+
+            $this->db->where('document_id', $id)
             ->delete($this->tables['contents']);
 
             $this->db->trans_complete();
@@ -302,10 +273,6 @@ class Documents_model extends CI_Model
             $this->db->trans_strict(FALSE);
 
             $is_delete = $this->db->delete($this->tables['document'], array('id' => $id));
-
-            if(!empty($document_detail->file_id)){
-                $this->database->unlink_file($document_detail->file_id);
-            }
 
             $flag = $is_delete > 0 ? 'success' : 'error';
             $this->db->trans_complete();
@@ -401,7 +368,7 @@ class Documents_model extends CI_Model
     function get_document_detail($id = null)
     {
         $where = !empty($id) ? array('dc.id' => $id) : array('dc.is_topic' => NULL);
-        return $this->db->select('dc.id,dc.title')
+        return $this->db->select('dc.id,dc.title,dc.slug')
         ->order_by('dc.position', 'asc')
         ->where($where)
         ->get($this->tables['document'] . ' dc')

@@ -25,21 +25,23 @@ class Carousel_model extends CI_Model
     {
         extract($params);
         $file_id = null;
-        $link = isset($link) && !empty($link) ? $link : (isset($document_id) ? $document_id : null);
+      $link = isset($link) && !empty($link) ? $link : (isset($document_slug) ? $document_slug : null);
         $file_id = isset($hidden_file) ? $hidden_file : null;
+        $delete_file_id =null;
 
         if (!isset($title) || empty($title)) {
             return;
         }
 
         if (isset($file['image']) && !empty($file['image']['name'])) {
+            $delete_file_id =$file_id;
             $file_id = $this->database->do_upload(array('file' => $file['image'], 'file_name' => 'image'));
         }
 
 
         $data = array(
             'title' => $title,
-            'link' => $link,
+            'link' => trim($link),
             'file_id' => $file_id,
             'start_date' => $start_date,
             'end_date' => $end_date,
@@ -53,6 +55,10 @@ class Carousel_model extends CI_Model
             $data['updated'] = date('Y-m-d h:i:sa');
             $this->db->where('id', $carousel_id)
                 ->update($this->tables['carousel'], $data);
+               
+            !empty($delete_file_id) ?
+                $this->database->unlink_file($delete_file_id)
+                :'';
         } else {
             $data['created'] = date('Y-m-d h:i:sa');
             $pos = $this->db->select_max('position')
@@ -76,15 +82,17 @@ class Carousel_model extends CI_Model
     {
         $resource = array();
         $where = !empty($id) ? array('id' => $id) : array('id !=' => null);
-        $resource['content'] =  $this->db->select('ca.id, ca.title, ca.file_id, ca.link , ca.link as document_id, ca.description,ca.start_date, ca.end_date')
+        $resource['content'] =  $this->db->select('ca.id, ca.title, ca.file_id, ca.link , ca.link as document_slug, ca.description,ca.start_date, ca.end_date')
             ->where($where)->get($this->tables['carousel'] . ' ca')->row();
 
-        if (!empty($resource['content'])) {
-            $rs = $resource['content'];
-            !empty($rs->link) && is_numeric($rs->link) ?
-                $rs->link = ''
-                :
-                $rs->document_id = '';
+         if (!empty($resource['content'])) {    
+            $rs = $resource['content']; 
+            d(strpos($rs->link, "http"));   
+            !empty($rs->link) && strpos($rs->link, "http") === false  ? 
+                $rs->link  = '' 
+                :   
+                $rs->document_slug = '';    
+
 
             $tr = '';
             $file = $this->database->get_file($rs->file_id);
@@ -94,8 +102,6 @@ class Carousel_model extends CI_Model
 
         return  $resource;
     }
-
-
 
     function sort_carousel($sort_array)
     {
@@ -113,8 +119,15 @@ class Carousel_model extends CI_Model
 
     function delete_carousel($id)
     {
+        $carousel=$this->db->select('file_id')->where('id',$id)->get($this->tables['carousel'])->row();
+
+        if(isset($carousel->file_id) && !empty($carousel->file_id)){
+            $this->database->unlink_file($carousel->file_id);
+        }
+
         $res = $this->db->where('id', $id)
             ->delete($this->tables['carousel']);
+
         return $res ? 'success' : 'error';
     }
 }

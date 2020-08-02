@@ -100,3 +100,4 @@ $route['delete-email/(:num)'] = 'auth/delete_email/$1';
 
 //setting
 $route['setting'] = 'setting/setting';
+$route['setting/clean-waste-files'] = 'setting/clean_waste_files';

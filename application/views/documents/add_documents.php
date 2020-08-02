@@ -86,22 +86,17 @@ defined('BASEPATH') or exit('No direct script access allowed');
         </div>
     </div>
 
-    <div class="form-row">
-        <div class="col">
+     
+
+   <div class="form-row">
+        <div class="col-4">
             <div class="form-group" id="icon">
                 <label for="icon">Icon</label>
-                <input type="hidden" id='icon_id' name="icon_id" value="<?php echo isset($detail) ? $detail['general_detail']->icon : ''; ?>">
-                <input type="file" class="form-control p-0 border-0" id="icon" name="icon">
+               <div id="add_icon" data-selected-id="<?php echo isset($detail) ? $detail['general_detail']->icon : ''; ?>" data-url="<?php echo site_url('resources/get-resource-content') ?>" data-file-url="<?php echo site_url('resources/get-resource') ?>"></div>
             </div>
         </div>
-        <div class="<?php echo isset($detail) ? ($detail['general_detail']->icon ? 'col-4' : 'col-4 d-none') : 'col d-none' ?>">
+        <div class="<?php echo isset($detail) ? ($detail['general_detail']->icon ? 'col-6' : 'col-6 d-none') : 'col-6 d-none' ?>">
             <?php echo isset($detail) ? get_resource($detail['general_detail']->icon) : ''; ?>
-        </div>
-        <div class="col">
-            <div class="form-group <?php echo isset($detail) && $detail['general_detail']->icon ? '' : 'd-none' ?>">
-                <label for="icon_delete">Delete</label>
-                <input type="checkbox" class="form-control w-20px" id="icon_delete" name="icon_delete">
-            </div>
         </div>
     </div>
 

@@ -45,5 +45,12 @@ class Setting extends CI_Controller
         $this->template->set('title', 'Setting');
         $this->template->load('default_layout', 'contents', 'setting', $data);
     }
+
+    public function clean_waste_files(){
+     
+        $res = $this->setting->clean_waste_files();
+        
+        echo json_encode($res);
+    }
 }
 ?>

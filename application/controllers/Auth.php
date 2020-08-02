@@ -20,6 +20,7 @@ class Auth extends CI_Controller
     {
         $data = array('title' => "Profile");
 
+
         $form = $this->input->post();
         if (!empty($form['submit'])) {
             $validation_rules = $this->config->item('login_form');
@@ -56,6 +57,7 @@ class Auth extends CI_Controller
         $data = array('title' => "Profile");
         $form = array();
         $user = $this->session->userdata('user_data');
+
         $data['detail'] = $this->auth->get_user($user['id']);
 
         $form = $this->input->post();

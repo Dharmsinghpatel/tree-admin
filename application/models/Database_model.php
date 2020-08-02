@@ -39,11 +39,15 @@ class Database_model extends CI_Model
                 $res = array('upload_data' => $this->upload->data());
                 $file_arr = $res['upload_data'] ? $res['upload_data'] : array();
                 if (!empty($file_arr)) {
-                    $this->unlink_file($file_id);
                     $file_detail = array('file_name' => $file_arr['orig_name'], 'unique_name' => $file_arr['file_name'], 'file_type' => $file_type, 'size' => $file_arr['file_size']);
                     $this->db->insert($this->tables['files'], $file_detail);
                     $insert_id = $this->db->insert_id();
+                    if(is_numeric($insert_id)) {
+                        $this->unlink_file($file_id);
+                    }
+
                 }
+
                 return $insert_id;
             }
         }

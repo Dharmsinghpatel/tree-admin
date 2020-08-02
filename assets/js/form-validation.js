@@ -47,7 +47,7 @@ $(document).ready(function () {
                 //     const file = $('#icon_id');
                 //     return !(file.attr('value') > 0);
                 // },
-                extension: 'png|jpg|jpeg'
+                // extension: 'png|jpg|jpeg'
             }
         }
     });

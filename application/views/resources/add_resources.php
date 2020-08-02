@@ -17,7 +17,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <div class="form-row">
         <div class="col">
             <div class="form-group">
-                <label for="product_type">Product Type<span class="text-danger">*</span></label>
+                <label for="product_type">Product Type</label>
                 <select class="form-control text-capitalize" id="product_type" name="product_type">
                     <option value="<?php echo isset($detail) ? $detail['content']->product_type : '' ?>"><?php echo isset($detail) && !empty($detail['content']->product_type) ? $detail['content']->product_type : 'Select Product Type' ?></option>
                     <option value="">Select Product Type</option>

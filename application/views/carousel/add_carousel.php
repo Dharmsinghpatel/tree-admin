@@ -25,7 +25,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
         <div class="col-6">
             <div class="form-group">
                 <label>Document</label>
-                <select class="form-control" name="document_id">
+                <select class="form-control" name="document_slug">
                     <option value="">Please select</option>
 
                     <?php echo empty($options) ? '' : $options; ?>

@@ -83,3 +83,16 @@ defined('BASEPATH') or exit('No direct script access allowed');
         </div>
     </div>
 </form>
+
+ <hr />
+
+    <div class="form-row">
+        <div class="col form-group">
+            <label>Clean Waste files</label>
+        </div>
+        <div class="col-auto form-group">
+             <a class="mr-10" href="javascript:void(0)">
+                    <button class="btn btn-outline-secondary delete" data-delete-url="<?php echo site_url('/setting/clean-waste-files')?>" ><span class="fa fa-trash-o f-24"></span></button>
+            </a>
+        </div>
+    </div>

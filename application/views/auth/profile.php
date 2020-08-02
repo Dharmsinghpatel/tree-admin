@@ -35,19 +35,19 @@ defined('BASEPATH') or exit('No direct script access allowed');
     <hr />
     <div class="form-group">
         <label for="crpassword">Current Password</label>
-        <input type="text" class="form-control" id="crpassword" name="crpassword" placeholder="Current Password">
+        <input type="password" class="form-control" id="crpassword" name="crpassword" placeholder="Current Password">
         <small class="text-danger"><?php echo form_error('crpassword'); ?></small>
     </div>
 
     <div class="form-group">
         <label for="password">Password</label>
-        <input type="text" class="form-control" id="password" name="password" placeholder="Password">
+        <input type="password" class="form-control" id="password" name="password" placeholder="Password">
         <small class="text-danger"><?php echo form_error('password'); ?></small>
     </div>
 
     <div class="form-group">
         <label for="cpassword">Confirm Password</label>
-        <input type="text" class="form-control" id="cpassword" name="cpassword" placeholder="Confirm Password">
+        <input type="password" class="form-control" id="cpassword" name="cpassword" placeholder="Confirm Password">
         <small class="text-danger"><?php echo form_error('cpassword'); ?></small>
     </div>
 

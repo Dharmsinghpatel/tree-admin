@@ -41,7 +41,7 @@ class Carousel extends CI_Controller
         if (!empty($id)) {
             $data['title'] = 'Edit Carousel';
             $data['detail'] = $this->carousel->get_detail($id);
-            $selected = $data['detail']['content']->document_id;
+            $selected = trim($data['detail']['content']->document_slug);
         }
 
         $form = $this->input->post();
@@ -50,10 +50,10 @@ class Carousel extends CI_Controller
 
         $ops = '';
         foreach ($documents as $key => $document) {
-            if ($document['id'] == $selected) {
-                $ops .= '<option  selected value="' . $document['id'] . '">' . $document['title'] . '</option>';
+            if ($document['slug'] == $selected) {
+                $ops .= '<option  selected value="' . trim($document['slug']) . '">' . $document['title'] . '</option>';
             } else {
-                $ops .= '<option  value="' . $document['id'] . '">' . $document['title'] . '</option>';
+                $ops .= '<option  value="' . trim($document['slug']) . '">' . $document['title'] . '</option>';
             }
         }
 

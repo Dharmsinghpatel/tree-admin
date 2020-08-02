@@ -5,7 +5,7 @@ class Resources_model extends CI_Model
     public $tables = array();
     function __construct()
     {
-        $this->tables = array('resource' => 'resources', 'classification' => 'classification', 'analytic' => 'analytic');
+        $this->tables = array('resource' => 'resources', 'classification' => 'classification', 'analytic' => 'analytic','content'=>'contents', 'document'=>'documents');
         $this->load->model('database_model', 'database');
     }
 
@@ -26,18 +26,23 @@ class Resources_model extends CI_Model
         $file_id = isset($hidden_file) ? $hidden_file : null;
         $file_id_2 = isset($hidden_file_2) ? $hidden_file_2 : null;
 
+
         if (!isset($resource_type) || empty($resource_type)) {
             return;
         }
 
         if (isset($file['image']) && !empty($file['image']['name']) && $resource_type == 'image') {
             $file_id = $this->database->do_upload(array('file' => $file['image'], 'file_name' => 'image'));
+            !is_numeric($file_id)?d($file_id):'';
+
         } else if ($resource_type != 'image') {
             $file_id = $this->database->do_upload(array('file' => $url, 'file_name' => $title, 'file_type' => $resource_type, 'is_file' => false));
+            !is_numeric($file_id)?d($file_id):'';
         }
 
         if (isset($file['video_thumbnail']) && !empty($file['video_thumbnail']['name']) && $resource_type == 'video') {
             $file_id_2 = $this->database->do_upload(array('file' => $file['video_thumbnail'], 'file_name' => 'video_thumbnail'));
+            !is_numeric($file_id_2)?d($file_id_2):'';
         }
 
         $data = array(
@@ -145,9 +150,21 @@ class Resources_model extends CI_Model
         $this->db->trans_start();
         $this->db->trans_strict(FALSE);
 
-        $resource_detail  = $this->db->select('rs.file_id, rs.file_id_2')
+        $rs_d=$resource_detail  = $this->db->select('rs.file_id, rs.file_id_2')
             ->where(array('rs.id' => $id))
             ->get($this->tables['resource'] . ' rs')->row();
+
+        $file_exist_in_docs = $this->db->select('dc.title, dc.display_type')
+            ->join($this->tables['content'] . ' ct', 'ct.document_id = dc.id', 'left')
+            ->or_where(array('dc.icon'=> $rs_d->file_id, 'ct.resource_id'=>$id))
+            ->distinct()
+            ->get($this->tables['document'] . ' dc')->result_array();
+
+        if(!empty($file_exist_in_docs)){
+            return array( 'status'=>'error','data'=>$file_exist_in_docs) ;
+            die;
+        }
+      
 
         $this->db->where('resource_id', $id)
             ->delete($this->tables['classification']);
@@ -164,7 +181,9 @@ class Resources_model extends CI_Model
             return 'error';
         }
 
-        return $res ? 'success' : 'error';
+        $status= $res ? 'success' : 'error';
+
+        return array('status' => $status, 'data'=>[]);
     }
 
     function get_resource_content($type)
