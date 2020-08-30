@@ -22,13 +22,20 @@ class Database_model extends CI_Model
         if (!$is_file) {
 
             $file_detail = array('file_name' => $file_name, 'unique_name' => $file, 'file_type' => $file_type, 'size' => strlen($file));
-            $this->db->insert($this->tables['files'], $file_detail);
-            $insert_id = $this->db->insert_id();
+
+           if(!empty($file_id)){
+                $this->db->where('id', $file_id)
+                        ->update($this->tables['files'], $file_detail);
+                $insert_id =$file_id;
+            }else{
+                 $this->db->insert($this->tables['files'], $file_detail);
+                $insert_id = $this->db->insert_id();
+            }
             return $insert_id;
         }
 
         if ($is_file) {
-            $config = $this->config->item($file_type);
+            $config = $this->config->item($file_type); 
             $this->load->library('upload');
             $this->upload->initialize($config);
 
@@ -40,12 +47,17 @@ class Database_model extends CI_Model
                 $file_arr = $res['upload_data'] ? $res['upload_data'] : array();
                 if (!empty($file_arr)) {
                     $file_detail = array('file_name' => $file_arr['orig_name'], 'unique_name' => $file_arr['file_name'], 'file_type' => $file_type, 'size' => $file_arr['file_size']);
-                    $this->db->insert($this->tables['files'], $file_detail);
-                    $insert_id = $this->db->insert_id();
-                    if(is_numeric($insert_id)) {
-                        $this->unlink_file($file_id);
-                    }
 
+                    if(!empty($file_id)){
+                         $this->unlink_file($file_id,false);
+
+                        $this->db->where('id', $file_id)
+                                ->update($this->tables['files'], $file_detail);
+                        $insert_id =$file_id;
+                    }else{
+                        $this->db->insert($this->tables['files'], $file_detail);
+                        $insert_id = $this->db->insert_id();
+                    }
                 }
 
                 return $insert_id;
@@ -53,7 +65,7 @@ class Database_model extends CI_Model
         }
     }
 
-    public function unlink_file($file_id)
+    public function unlink_file($file_id,$is_delete=true)
     {
 
         if (isset($file_id) && !empty($file_id)) {
@@ -66,9 +78,12 @@ class Database_model extends CI_Model
                 !empty($file) ? unlink($config['upload_path'] . '' . $file->unique_name) : '';
             }
 
-            $res = $this->db->where('id', $file_id)
-                ->delete($this->tables['files']);
-            return $res > 0;
+            if($is_delete){
+                $res = $this->db->where('id', $file_id)
+                    ->delete($this->tables['files']);
+                return $res > 0;
+            }
+
             return true;
         }
     }

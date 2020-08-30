@@ -417,3 +417,19 @@ if (!function_exists('d')) {
         echo '<pre>', var_dump($value), '</pre>';
     }
 }
+
+/**
+ * testing function
+ */
+if (!function_exists('rnbsp')) {
+    function rnbsp($value)
+    {
+        $content=$value;
+        if(!empty($value)){
+            $string = htmlentities($value, null, 'utf-8');
+            $content = str_replace("&nbsp;", "", $string);
+            $content = html_entity_decode($content);
+        }
+        return $content;
+    }
+}

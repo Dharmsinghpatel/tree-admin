@@ -124,14 +124,11 @@ class Resources extends CI_Controller
 
     public function delete_resource($id = null)
     {
-        $status = 'error';
-        $data=[];
+        $res = array('status' => 'error','data'=>[] );
         if (!empty($id)) {
-            $res = $this->resource->delete_resource($id);
-            $status =$res['status'];
-            $data =$res['data'];
+            $res = $this->resource->delete_resource($id);;
         }
-        echo json_encode(array('status' => $status,'data'=>$data));
+        echo json_encode($res);
     }
 
     public function get_resource_content()

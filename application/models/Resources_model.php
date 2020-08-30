@@ -22,7 +22,7 @@ class Resources_model extends CI_Model
         extract($params);
         $file_id = null;
         $resource_id = isset($resource_id) ? $resource_id : null;
-        $url = isset($url) ? $url : (isset($video_id) ? $video_id : null);
+        $url = isset($url) ? $url : (isset($video_id) ? $video_id : null); 
         $file_id = isset($hidden_file) ? $hidden_file : null;
         $file_id_2 = isset($hidden_file_2) ? $hidden_file_2 : null;
 
@@ -31,17 +31,19 @@ class Resources_model extends CI_Model
             return;
         }
 
+        // p($params);die;
+
         if (isset($file['image']) && !empty($file['image']['name']) && $resource_type == 'image') {
-            $file_id = $this->database->do_upload(array('file' => $file['image'], 'file_name' => 'image'));
+            $file_id = $this->database->do_upload(array('file' => $file['image'], 'file_name' => 'image','file_id'=>$file_id));
             !is_numeric($file_id)?d($file_id):'';
 
         } else if ($resource_type != 'image') {
-            $file_id = $this->database->do_upload(array('file' => $url, 'file_name' => $title, 'file_type' => $resource_type, 'is_file' => false));
+            $file_id = $this->database->do_upload(array('file' => $url, 'file_name' => $title, 'file_type' => $resource_type, 'is_file' => false,'file_id'=>$file_id));
             !is_numeric($file_id)?d($file_id):'';
         }
 
         if (isset($file['video_thumbnail']) && !empty($file['video_thumbnail']['name']) && $resource_type == 'video') {
-            $file_id_2 = $this->database->do_upload(array('file' => $file['video_thumbnail'], 'file_name' => 'video_thumbnail'));
+            $file_id_2 = $this->database->do_upload(array('file' => $file['video_thumbnail'], 'file_name' => 'video_thumbnail','file_id'=>$file_id_2));
             !is_numeric($file_id_2)?d($file_id_2):'';
         }
 
@@ -49,7 +51,7 @@ class Resources_model extends CI_Model
             'title' => $title,
             'resource_type' => $resource_type,
             'file_id' => $file_id,
-            'file_id_2' => !empty($file_id_2) ? $file_id_2 : NULL,
+            'file_id_2' => !empty($file_id_2) && $resource_type=='video'? $file_id_2 : NULL,
             'description' => $description
         );
 
@@ -149,6 +151,7 @@ class Resources_model extends CI_Model
     {
         $this->db->trans_start();
         $this->db->trans_strict(FALSE);
+        $msg='Resource is deleted';
 
         $rs_d=$resource_detail  = $this->db->select('rs.file_id, rs.file_id_2')
             ->where(array('rs.id' => $id))
@@ -182,8 +185,9 @@ class Resources_model extends CI_Model
         }
 
         $status= $res ? 'success' : 'error';
+        $msg= $res ? $msg : '';
 
-        return array('status' => $status, 'data'=>[]);
+        return array('status' => $status, 'data'=>[],'msg'=>$msg);
     }
 
     function get_resource_content($type)
@@ -198,7 +202,7 @@ class Resources_model extends CI_Model
 
     function chart()
     {
-        $products = array('animal', 'crop', 'fertilizer', 'pesticides', 'plant', 'none');
+        $products = array('animal', 'crop', 'fertilizer', 'pesticides', 'plant','flower','tree','insects','none');
         $displays = array('info', 'news', 'blog', 'video', 'dashboard');
         $chart_data = array();
 

@@ -60,6 +60,40 @@ defined('BASEPATH') or exit('No direct script access allowed');
                 toolTipContent: "Plant View {y} on {x}",
                 showInLegend: true,
                 dataPoints: <?php echo json_encode($charts['overall']['plant'], JSON_NUMERIC_CHECK); ?>
+            },
+            {
+                type: "line",
+                name: "Insects",
+                markerSize: 0,
+                color: 'red',
+                toolTipContent: "Insects View {y} on {x}",
+                showInLegend: true,
+                dataPoints: <?php echo json_encode($charts['overall']['insects'], JSON_NUMERIC_CHECK); ?>
+            },
+            {
+                type: "line",
+                name: "Flower",
+                markerSize: 0,
+                color: 'yellow',
+                toolTipContent: "Flower View {y} on {x}",
+                showInLegend: true,
+                dataPoints: <?php echo json_encode($charts['overall']['flower'], JSON_NUMERIC_CHECK); ?>
+            },{
+                type: "line",
+                name: "Tree",
+                markerSize: 0,
+                color: 'lightblue',
+                toolTipContent: "Tree View {y} on {x}",
+                showInLegend: true,
+                dataPoints: <?php echo json_encode($charts['overall']['tree'], JSON_NUMERIC_CHECK); ?>
+            },{
+                type: "line",
+                name: "None",
+                markerSize: 0,
+                color: 'darkred',
+                toolTipContent: "None View {y} on {x}",
+                showInLegend: true,
+                dataPoints: <?php echo json_encode($charts['overall']['none'], JSON_NUMERIC_CHECK); ?>
             }]
         });
         overall.render();

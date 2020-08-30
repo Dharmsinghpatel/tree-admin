@@ -137,7 +137,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
     </div>
 
     <div class="mt-50 row">
-        <a href="<?php echo site_url('documents/list-documents') ?>" class="btn btn-outline-dark">Cancel</a>
+         <a href="javascript:history.back()" class="btn btn-outline-dark">Cancel</a>
         <div class="ml-auto">
             <button type="submit" id="add_more" name="add_more" value="add-more" class="btn btn-outline-dark mr-10 <?php echo isset($detail) ? ($detail['general_detail']->id ? 'd-none' : '') : '' ?> ">Add More</button>
             <button type="submit" id="submit" name="submit" value="submit" class="btn btn-primary "><?php echo isset($detail) ? ($detail['general_detail']->id ? 'Edit' : 'Add') : 'Add' ?></button>

@@ -96,12 +96,12 @@ class Api_model extends CI_Model
             switch ($document['display_type']) {
                 case 'info':
                 $info_count += 1;
-                $limit = $info_count <= 5 ? ($width > 557 ? 250 : 20) : ($width > 557 ? 20 : 20);
+                $limit = $info_count <= 5 ? ($width > 557 ? 250 : 90) : ($width > 557 ? 20 : 20);
                 $document['description'] = cut_text($document['description'], $limit);
                 $info[] = $document;
                 break;
                 case 'news':
-                $limit = $document['image_url']?20:50 ;
+                $limit = $document['image_url']?20:50;
                 $document['description'] = cut_text($document['description'], $limit);
                 $news[] = $document;
                 break;
@@ -113,10 +113,7 @@ class Api_model extends CI_Model
             }
         }
 
-        $meta_data = array( 
-            array('name' => 'description', 'content' => 'Agri Arbor कृषि संबंधित विभिन्न जानकारियों के लिए समर्पित है। Agri Arbor में वीडियो, ब्लॉग, न्यूज़ की सीरीज़ हैं जो कृषि में एक बेहतरीन रास्ता निकालने का सुझाव देते हैं।'),   
-            array('name' => 'keywords', 'content' => 'agriarbor, home, agri arbor home, agriarbor home')    
-        );  
+        $meta_data = $this->meta_data('home'); 
 
 
         $dashboard = array(
@@ -153,7 +150,6 @@ class Api_model extends CI_Model
 
         if (!empty($document)) {
             $document = $document[0];
-            // $meta_keywords = implode(', ', array_values($document));
 
             if (!empty($document['cl_type'])) {
                 $data_analytic = array(
@@ -164,14 +160,6 @@ class Api_model extends CI_Model
 
                 $this->analytic_manager($data_analytic);
             }
-
-            // if(!empty($document['icon'])){
-            //     $config = $this->config->item('image');
-            //     $file = $this->database->get_file($document['icon']);
-            //     $document['icon'] = site_url($config['upload_path']) . "/" . $file->unique_name;
-
-            //     $document['icon']=null;
-            // }
 
 
             $document['publish_time'] = $document['publish_time'] && $document['publish_time']!= '0000-00-00'?$document['publish_time']:null;
@@ -196,16 +184,11 @@ class Api_model extends CI_Model
                         $resource_detail = $this->resource->get_resource($content['resource_id']);
                         $temp = $this->resource_manager($resource_detail);
                         break;
-                            // case 'topic':
-                            //     $temp['type'] = $content['content_type'];
-                            //     $temp['sub_topics'] = $this->topic_detail($content['topic_id']);
-                            //     break;
                         case 'document':
                         $temp['type'] = $content['content_type'];
 
                         $temp['document_id'] = $this->document->get_document_detail($content['topic_id'])[0]['slug'];
 
-                        // $temp['document_id'] = $content['slug'];
                         $temp['title'] = $content['description'];
                         $temp['display_type'] = 'info';
                         break;
@@ -244,8 +227,8 @@ class Api_model extends CI_Model
 
 
         $meta_data = array(
-            array('name' => 'keywords', 'content' => isset($metadata_row->keywords) ? $metadata_row->keywords : ''),
-            array('name' => 'description', 'content' => isset($metadata_row->description) ? $metadata_row->description : '')
+            array('name' => 'keywords', 'content' => isset($metadata_row->keywords) ? rnbsp($metadata_row->keywords) : ''),
+            array('name' => 'description', 'content' => isset($metadata_row->description) ? rnbsp($metadata_row->description) : '')
         );
 
         $document['meta'] = $meta_data;
@@ -307,7 +290,12 @@ class Api_model extends CI_Model
             $topics[] = $document;
         }
 
-        $metaDesc ='Agri Arbor\'s ' . $topics_type . ' फसल, पशु, पौधे, खाद, कीटनाशक आदि का बुनियादी ज्ञान प्रदान करती है।';
+
+        return array('topics' => $topics, 'meta' => $this->meta_data($topics_type));
+    }
+
+    public function meta_data($topics_type='info'){
+         $metaDesc ='Agri Arbor\'s ' . $topics_type . ' फसल, पशु, पौधे, खाद, कीटनाशक आदि का बुनियादी ज्ञान प्रदान करती है।';
 
         switch ($topics_type) {
             case 'blog':
@@ -315,14 +303,19 @@ class Api_model extends CI_Model
                 break;
                case 'news':
                 $metaDesc = 'Agri Arbor\'s news शासन की योजनाओं, कृषि संबंधी समाचारों के साथ आता है, जो बुनियादी ज्ञान प्रदान करता है।';
+                break;
+                case 'videos':
+                 $metaDesc ='Agri Arbor\'s videos कृषि उत्पादों जैसे फसल, पशु, पौधे, खाद, कीटनाशक आदि देखभाल की प्रक्रिया, उत्पादों को बनाने और ये कैसे काम करता है, इसके बारे में बताता है।';
+                break;
+                case 'home':
+                  $metaDesc = 'Agri Arbor कृषि संबंधित विभिन्न जानकारियों के लिए समर्पित है। Agri Arbor में वीडियो, ब्लॉग, न्यूज़ की सीरीज़ हैं जो कृषि में एक बेहतरीन रास्ता निकालने का सुझाव देते हैं।';   
+                break; 
         }
 
-        $meta_data = array(
-            array('name' => 'description', 'content' => $metaDesc ),
-            array('name' => 'keywords', 'content' => 'agriarbor, ' . $topics_type . ', agri arbor ' . $topics_type . ', agriarbor ' . $topics_type . '')
+        return $meta_data = array(
+            array('name' => 'description', 'content' => rnbsp($metaDesc) ),
+            array('name' => 'keywords', 'content' => 'agriarbor, ' . $topics_type . ', agri arbor ' . rnbsp($topics_type) . ', agriarbor ' . rnbsp($topics_type) . '')
         );
-
-        return array('topics' => $topics, 'meta' => $meta_data);
     }
 
     public function get_videoes($id = null)
@@ -346,14 +339,7 @@ class Api_model extends CI_Model
             }
         }
 
-        $route = 'videos';
-
-        $meta_data = array(
-            array('name' => 'description', 'content' => 'Agri Arbor\'s videos कृषि उत्पादों जैसे फसल, पशु, पौधे, खाद, कीटनाशक आदि देखभाल की प्रक्रिया, उत्पादों को बनाने और ये कैसे काम करता है, इसके बारे में बताता है।'),
-            array('name' => 'keywords', 'content' => 'agriarbor, ' . $route . ', agri arbor ' . $route . ', agriarbor ' . $route . '')
-        );
-
-        return array('videos' => $resources, 'meta' => $meta_data);;
+        return array('videos' => $resources, 'meta' => $this->meta_data('videos'));;
     }
 
     public function search_product($params = array())
@@ -362,7 +348,7 @@ class Api_model extends CI_Model
         $where = $product_type == 'all' ?
         array('dc.is_topic' => null, 'dc.display_type' => $display_type, 'dc.is_active>'=>0) :
         array('dc.is_topic' => null, 'dc.display_type' => $display_type, 'cl.product_type' => $product_type, 'dc.is_active>'=>0);
-        $documents = $this->db->select('dc.id, dc.display_type, dc.title, fs.unique_name as image_url, fs.file_name')
+        $documents = $this->db->select('dc.id, dc.slug, dc.display_type, dc.title, fs.unique_name as image_url, fs.file_name')
         ->join($this->tables['classification'] . ' cl', 'cl.document_id = dc.id', 'left')
         ->join($this->tables['file'] . ' fs', 'fs.id = dc.icon', 'left')
         ->order_by('dc.id', 'desc')
@@ -388,9 +374,13 @@ class Api_model extends CI_Model
             $document['title'] = cut_text($document['title'], 30);
 
             $document['description'] = cut_text($document['description']);
+
+            $document['id'] = trim($document['slug']);
+
             $topics[] = $document;
         }
-        return $topics;
+
+        return array('topics' => $topics, 'meta' => $this->meta_data($display_type));
     }
 
     public function search_videoes($params = array())
@@ -420,7 +410,9 @@ class Api_model extends CI_Model
                 $resources[$key]['link'] = $file->unique_name;
             }
         }
-        return $resources;
+
+        return array('videos' => $resources, 'meta' => $this->meta_data($display_type));
+
     }
 
     public function analytic($params)

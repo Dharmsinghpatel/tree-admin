@@ -51,9 +51,16 @@ class Documents extends REST_Controller
         if ($this->form_validation->run() == FALSE) {
             $this->response(array('data' => array(), 'status' => 'error', 'msg' => $this->lang->line('invalid_search')), REST_Controller::HTTP_OK);
         } else {
-            $data = $data['display_type'] == 'video' ? $this->api->search_videoes($data) : $this->api->search_product($data);
+            $count =0;
+            if($data['display_type'] == 'video'){ 
+                $data = $this->api->search_videoes($data);
+                $count=count($data['videos']);
+            }else{
+                $data =$this->api->search_product($data);
+                $count=count($data['topics']);
+            }
 
-            $msg =count($data).' product\'s detail available. '.count($data).' उत्पाद का विवरण उपलब्ध है।';
+            $msg = $count.' product\'s detail available. '.$count.' उत्पाद का विवरण उपलब्ध है।';
 
             $this->response(array('data' => $data, 'status' => 'success', 'msg' => $msg), REST_Controller::HTTP_OK);
         }

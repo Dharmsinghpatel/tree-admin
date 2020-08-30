@@ -30,6 +30,7 @@ class Auth extends CI_Controller
             if ($this->form_validation->run() == true) {
                 $user_data = $this->auth->login($form['user_id'], $form['password']);
 
+
                 if (!empty($user_data) && $token == 'ksw') {
                     $this->session->set_userdata('user_data', $user_data);
 

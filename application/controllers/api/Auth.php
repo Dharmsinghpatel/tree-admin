@@ -22,10 +22,10 @@ class Auth extends REST_Controller
         $this->form_validation->set_rules($validation_rules);
 
         if ($this->form_validation->run() == FALSE) {
-            $this->response(array('status' => 'error', 'msg' => $this->form_validation->error_array()), REST_Controller::HTTP_OK);
+            $this->response(array('status' => 'error_email', 'msg' => $this->form_validation->error_array()), REST_Controller::HTTP_OK);
         } else {
             $status = $this->api->message_save($data);
-            $this->response(array('status' => $status, 'msg' => $this->lang->line($status ? 'success' : 'error')), REST_Controller::HTTP_OK);
+            $this->response(array('status' => $status, 'msg' => $this->lang->line($status ? 'success_email' : 'error_email')), REST_Controller::HTTP_OK);
         }
     }
 }
